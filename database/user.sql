@@ -32,16 +32,16 @@ USE `user`;
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
-  `userid` varchar(12) NOT NULL,
+  `user_id` varchar(12) NOT NULL,
   `name` varchar(16) NOT NULL,
-  PRIMARY KEY (`userid`)
+  PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`userid`, `name`) VALUES
+INSERT INTO `user` (`user_id`, `name`) VALUES
 ('edwinlzs', 'Edwin'),
 ('weeb', 'Onii-San'),
 ('test', 'Tester');
