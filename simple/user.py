@@ -10,27 +10,27 @@ db = SQLAlchemy(app)
 class User(db.Model):
     """
     creates User table with the following attributes:
-    userid: varchar(12), primary key
+    user_id: varchar(12), primary key
     name: varchar(16)
     """
     __tablename__ = 'user'
 
-    userid = db.Column(db.String(12), primary_key=True)
+    user_id = db.Column(db.String(12), primary_key=True)
     name = db.Column(db.String(16), nullable=False)
 
-    def __init__(self, userid, name):
-        self.userid = userid
+    def __init__(self, user_id, name):
+        self.user_id = user_id
         self.name = name
 
     def json(self):
-        return {"userid":self.userid, "name":self.name}
+        return {"user_id":self.user_id, "name":self.name}
 
-@app.route("/user/<string:userid>")
-def find_by_userid(userid):
+@app.route("/user/<string:user_id>")
+def find_by_user_id(user_id):
     """
-    to retrieve user information by userid
+    to retrieve user information by user_id
     """
-    user = User.query.filter_by(userid=userid).first()
+    user = User.query.filter_by(user_id=user_id).first()
     if user:
         return jsonify(
             {
