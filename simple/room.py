@@ -12,27 +12,42 @@ CORS(app)
 
 class Room(db.Model):
     __tablename__ = 'room'
-    room_id = db.Column(db.Integer(6), primary_key=True)
+    room_id = db.Column(db.Integer(), primary_key=True)
     room_name = db.Column(db.String(64), nullable=False)
-    game_id= db.Column(db.Integer(3), nullable=False)
-    capacity = db.Column(db.Integer(2), nullable=False)
-    host = db.Column(db.String(12), nullable=False)
+    game_id= db.Column(db.Integer(), nullable=False)
+    capacity = db.Column(db.Integer(), nullable=False)
+    host_id = db.Column(db.String(12), nullable=False)
     
 
-    def __init__(self, room_id, room_name, game_name, capacity, host):
+    def __init__(self, room_id, room_name, game_id, capacity, host_id):
         self.room_id = room_id
         self.room_name = room_name
-        self.game_name = game_name
+        self.game_id = game_id
         self.capacity = capacity
-        self.host = host
+        self.host_id = host_id
 
     def json(self):
-        return {"room_id": self.room_id, "room_name": self.room_name, "capacity": self.capacity, "game_name":self.game_name, "host": self.host}
+        return {"room_id": self.room_id, "room_name": self.room_name, "capacity": self.capacity, "game_id":self.game_id, "host_id": self.host_id}
 
 
-#get room based on game_id
+class Member(db.Model):
+    __tablename__ = 'member'
+    user_id = db.Column(db.String(12), primary_key=True)
+    room_id = db.Column(db.Integer(), primary_key=True)
+
+
+    def __init__(self, user_id, room_id):
+        self.user_id = user_id
+        self.room_id = room_id
+
+
+    def json(self):
+        return {"user_id": self.user_id, "room_id": self.room_id}
+
+
+#Get room based on game_id
 @app.route("/room/<string:game_id>")
-def get_room():
+def get_room(game_id):
     roomlist = Room.query.filter_by(game_id=game_id)
     if roomlist:
         return jsonify(
@@ -49,44 +64,34 @@ def get_room():
     ), 404
 
 #Create Room
-@app.route("/room/<string:user_id>", methods=['POST'])
-def create_room(user_id):
-    if (Book.query.filter_by(isbn13=isbn13).first()):
-        return jsonify(
-            {
-                "code": 400,
-                "data": {
-                    "isbn13": isbn13
-                },
-                "message": "Book already exists."
-            }
-        ), 400
-
+@app.route("/room", methods=['POST'])
+def create_room():
+    #json file sent here
     data = request.get_json()
-    book = Book(isbn13, **data)
+    room = Room(**data)
 
     try:
-        db.session.add(book)
+        db.session.add(room)
         db.session.commit()
     except:
         return jsonify(
             {
                 "code": 500,
                 "data": {
-                    "isbn13": isbn13
+                    "room": room
                 },
-                "message": "An error occurred creating the book."
+                "message": "An error occurred creating the room."
             }
         ), 500
 
     return jsonify(
         {
             "code": 201,
-            "data": book.json()
+            "data": room.json()
         }
     ), 201
 
-
+#Join Room
 @app.route("/book/<string:isbn13>", methods=['PUT'])
 def update_book(isbn13):
     book = Book.query.filter_by(isbn13=isbn13).first()
@@ -115,7 +120,7 @@ def update_book(isbn13):
         }
     ), 404
 
-
+#Leave Room
 @app.route("/book/<string:isbn13>", methods=['DELETE'])
 def delete_book(isbn13):
     book = Book.query.filter_by(isbn13=isbn13).first()
