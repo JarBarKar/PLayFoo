@@ -92,58 +92,67 @@ def create_room():
     ), 201
 
 #Join Room
-@app.route("/book/<string:isbn13>", methods=['PUT'])
-def update_book(isbn13):
-    book = Book.query.filter_by(isbn13=isbn13).first()
-    if book:
-        data = request.get_json()
-        if data['title']:
-            book.title = data['title']
-        if data['price']:
-            book.price = data['price']
-        if data['availability']:
-            book.availability = data['availability'] 
-        db.session.commit()
+@app.route("/room/<string:room_id>", methods=['POST'])
+def join_room(room_id):
+    selected_room = Room.query.filter_by(room_id=room_id)
+    no_of_members = len(Member.query.filter_by(room_id=room_id))
+    if selected_room['capacity']==no_of_members:
         return jsonify(
             {
-                "code": 200,
-                "data": book.json()
+                "code" : 500,
+                "message" : "Room is full"
             }
         )
+    else:
+        data = request.get_json()
+        room = Room(**data)
+
+    try:
+        db.session.add(room)
+        db.session.commit()
+    except:
+        return jsonify(
+            {
+                "code": 500,
+                "data": {
+                    "room": room
+                    },
+                "message": "An error occurred joining the room."
+            }
+        ), 500
+
     return jsonify(
         {
-            "code": 404,
-            "data": {
-                "isbn13": isbn13
-            },
-            "message": "Book not found."
+            "code": 201,
+            "data": room.json()
         }
-    ), 404
+    ), 201
+
 
 #Leave Room
-@app.route("/book/<string:isbn13>", methods=['DELETE'])
-def delete_book(isbn13):
-    book = Book.query.filter_by(isbn13=isbn13).first()
-    if book:
-        db.session.delete(book)
+@app.route("/room/<string:user_id>", methods=['DELETE'])
+def leave_room(user_id):
+    try:
+        deleted_user = Member.query.filter_by(user_id=user_id)
+        db.session.delete(deleted_user)
         db.session.commit()
+    except:
         return jsonify(
             {
-                "code": 200,
+                "code": 500,
                 "data": {
-                    "isbn13": isbn13
-                }
+                    "room": room
+                    },
+                "message": "An error occurred leaving the room. Please try again."
             }
-        )
+        ), 500
     return jsonify(
-        {
-            "code": 404,
-            "data": {
-                "isbn13": isbn13
-            },
-            "message": "Book not found."
+    {
+        "code": 201,
+        "data": room.json(),
+        "message": "Successfully leave room"
         }
-    ), 404
+    ), 201
 
 
 if __name__ == '__main__':
