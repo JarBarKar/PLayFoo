@@ -129,7 +129,7 @@ def join_room(room_id):
     ), 201
 
 
-#Leave Room (havent decide PUT or POST)
+#Leave Room
 @app.route("/room/<string:user_id>", methods=['DELETE'])
 def leave_room(user_id):
     try:
