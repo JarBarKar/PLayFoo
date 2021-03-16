@@ -1,0 +1,7 @@
+Assigned Ports:
+
+Simple Microservices:
+    5000: user.py
+    5001: room.py
+    5002: game.py
+    5003: message.py
