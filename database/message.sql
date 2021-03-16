@@ -19,34 +19,33 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `room`
+-- Database: `message`
 --
-CREATE DATABASE IF NOT EXISTS `room` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `room`;
+CREATE DATABASE IF NOT EXISTS `message` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `message`;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `room`
+-- Table structure for table `message`
 --
 
-DROP TABLE IF EXISTS `room`;
-CREATE TABLE IF NOT EXISTS `room` (
-  `room_id` int(6) NOT NULL AUTO_INCREMENT,
-  `room_name` varchar(64) NOT NULL,
-  `game_id` int(3) NOT NULL,
-  `capacity` int(2) NOT NULL,
-  `host_id` varchar(12) NOT NULL,
-  PRIMARY KEY (`room_id`)
+DROP TABLE IF EXISTS `message`;
+CREATE TABLE IF NOT EXISTS `message` (
+  `message_id` int(6) NOT NULL AUTO_INCREMENT,
+  `room_id` int(6) NOT NULL,
+  `user_id` varchar(12) NOT NULL,
+  `content` varchar(150) NOT NULL,
+  PRIMARY KEY (`message_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `room`
+-- Dumping data for table `message`
 --
 
-INSERT INTO `room` (`room_id`, `room_name`, `game_id`, `capacity`, `host_id`) VALUES
-(1, 'First room everrrr', 265, 24, 'edwinlzs'),
-(2, 'Second room everrrr', 10, 2, 'weeb');
+INSERT INTO `message` (`message_id`, `room_id`, `user_id`, `content`) VALUES
+(1, 1, 'edwinlzs', 'first message everrrrr'),
+(2, 2, 'weeb', 'second message everrrrr');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -14,10 +14,9 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-def create_exchange(room_id):
+def create_exchange(exchangename):
     # Set up the exchange if the exchange doesn't exist
-    # - use a 'topic' exchange to enable interaction
-    exchangename= room_id + "_fanout"
+    # - use a 'fanout' exchange to enable interaction
     exchangetype="fanout"
     channel.exchange_declare(exchange=exchangename, exchange_type=exchangetype, durable=True)
         # 'durable' makes the exchange survive broker restarts
@@ -25,7 +24,7 @@ def create_exchange(room_id):
     # Here can be a place to set up all queues needed by the microservices,
     # - instead of setting up the queues using RabbitMQ UI.
 
-def create_queue(exchangename, user_id, room_id)
+def create_queue(exchangename, user_id):
     ############   Message queue   #############
     #delcare Message queue
     queue_name = 'Message'
@@ -33,25 +32,25 @@ def create_queue(exchangename, user_id, room_id)
         # 'durable' makes the queue survive broker restarts
 
     #bind Message queue
+    routing_key = user_id # use user_id as routing key for now
     channel.queue_bind(exchange=exchangename, queue=queue_name, routing_key=routing_key) 
         # bind the queue to the exchange via the key
         # any routing_key with two words and ending with '.error' will be matched
 
 """
 This function in this module sets up a connection and a channel to a local AMQP broker,
-and declares a 'topic' exchange to be used by the microservices in the solution.
+and declares a 'fanout' exchange to be used by the microservices in the solution.
 """
 def check_setup():
     # The shared connection and channel created when the module is imported may be expired, 
     # timed out, disconnected by the broker or a client;
     # - re-establish the connection/channel is they have been closed
-    global connection, channel, hostname, port, exchangename, exchangetype
+    global connection, channel, hostname, port
 
     if not is_connection_open(connection):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname, port=port))
     if channel.is_closed:
         channel = connection.channel()
-        channel.exchange_declare(exchange=exchangename, exchange_type=exchangetype)
 
 def is_connection_open(connection):
     # For a BlockingConnection in AMQP clients,
