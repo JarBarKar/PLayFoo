@@ -22,6 +22,6 @@ r = requests.get(url = URL, params = PARAMS)
 # getting data in json format
 data = r.json()
 
-results = data['results']
+# results = data['results']
 
-print(results)
+print(data)
