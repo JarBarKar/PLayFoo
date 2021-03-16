@@ -41,25 +41,78 @@ class Message(db.Model):
 # function to create an exchange for a specific room's chat whenever a room is created
 @app.route('/message/create/<int:room_id>', methods=['POST'])
 def create_room_chat(room_id):
-    # note: add error handling and HTTP response here later
-    exchangename= str(room_id) + "_roomchat"
-    amqp_setup.create_exchange(exchangename)
-    print('exchange created')
+    exchange_name= str(room_id) + "_roomchat"
+
+    try:
+        amqp_setup.create_exchange(exchange_name)
+        code = 200
+        message = "Exchange successfully created."
+    except Exception as e:
+        code = 500
+        message = "An error occurred while creating the exchange. " + str(e)
+
+    return jsonify(
+        {
+            "code": code,
+            "data": {
+                "exchange_name": exchange_name
+            },
+            "message": message
+        }
+    ), code
+
 
 # function to create a queue for a user in an exchange of the room chat they joined
 @app.route('/message/join/<int:room_id>&<string:user_id>', methods=['POST'])
 def join_room_chat(room_id, user_id):
-    # note: add error handling and HTTP response here later
-    exchangename= str(room_id) + "_roomchat"
-    amqp_setup.create_queue(exchangename, user_id)
-    print('queue_created')
+    exchange_name= str(room_id) + "_roomchat"
+    queue_name = user_id + "_queue"
+    try:
+        amqp_setup.create_queue(exchange_name, queue_name)
+        code = 200
+        message = "Queue successfully created."
+    except Exception as e:
+        code = 500
+        message = "An error occurred while creating the queue. " + str(e)
+
+    return jsonify(
+        {
+            "code": code,
+            "data": {
+                "exchange_name": exchange_name,
+                "queue_name": queue_name
+            },
+            "message": message
+        }
+    ), code
+
 
 # function to publish a sent message to the exchange
 @app.route('/message/send/<int:room_id>&<string:user_id>&<string:content>', methods=['POST'])
 def send_message(room_id, user_id, content):
-    # note: add error handling and HTTP response here later
-    exchangename = str(room_id) + "_roomchat"
-    amqp_setup.channel.basic_publish(exchange=exchangename, body=content, properties=pika.BasicProperties(delivery_mode = 2))
+    # NOTE: currently we are treating queue_name as the routing key (see amqp_setup), might want to modify later
+    exchange_name = str(room_id) + "_roomchat"
+    queue_name = user_id + "_queue"
+    try:
+        amqp_setup.send_message(exchange_name, queue_name, content)
+        code = 200
+        message = "Message successfully sent."
+    except Exception as e:
+        code = 500
+        message = "An error occurred while sending the message. " + str(e)
+
+    return jsonify(
+        {
+            "code": code,
+            "data": {
+                "exchange_name": exchange_name,
+                "content": content
+            },
+            "message": message
+        }
+    ), code
+
+# NOTE: add function to receive message later
 
 if __name__ == "__main__":
     app.run(port=5003, debug=True)

@@ -14,28 +14,25 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-def create_exchange(exchangename):
+def create_exchange(exchange_name):
     # Set up the exchange if the exchange doesn't exist
     # - use a 'fanout' exchange to enable interaction
     exchangetype="fanout"
-    channel.exchange_declare(exchange=exchangename, exchange_type=exchangetype, durable=True)
+    return channel.exchange_declare(exchange=exchange_name, exchange_type=exchangetype, durable=True)
         # 'durable' makes the exchange survive broker restarts
 
-    # Here can be a place to set up all queues needed by the microservices,
-    # - instead of setting up the queues using RabbitMQ UI.
-
-def create_queue(exchangename, user_id):
+def create_queue(exchange_name, queue_name):
     ############   Message queue   #############
     #delcare Message queue
-    queue_name = 'Message'
     channel.queue_declare(queue=queue_name, durable=True)
         # 'durable' makes the queue survive broker restarts
 
     #bind Message queue
-    routing_key = user_id # use user_id as routing key for now
-    channel.queue_bind(exchange=exchangename, queue=queue_name, routing_key=routing_key) 
+    return channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key="#") 
         # bind the queue to the exchange via the key
-        # any routing_key with two words and ending with '.error' will be matched
+
+def send_message(exchange_name, queue_name, content):
+    return channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=queue_name)
 
 """
 This function in this module sets up a connection and a channel to a local AMQP broker,
