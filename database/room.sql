@@ -27,7 +27,7 @@ USE `room`;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `roomr`
+-- Table structure for table `room`
 --
 
 DROP TABLE IF EXISTS `room`;
@@ -36,12 +36,12 @@ CREATE TABLE IF NOT EXISTS `room` (
   `room_name` varchar(64) NOT NULL,
   `game_id` int(3) NOT NULL,
   `capacity` int(2) NOT NULL,
-  `user_id` varchar(12) NOT NULL,
+  `host_id` varchar(12) NOT NULL,
   PRIMARY KEY (`room_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `user`
+-- Dumping data for table `room`
 --
 
 INSERT INTO `room` (`room_id`, `room_name`, `game_id`, `capacity`, `host_id`) VALUES
