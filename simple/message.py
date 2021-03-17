@@ -69,11 +69,12 @@ def join_room_chat(room_id, user_id):
     queue_name = user_id + "_queue"
     try:
         amqp_setup.create_queue(exchange_name, queue_name)
+        amqp_setup.receive_messages(queue_name, callback)
         code = 200
-        message = "Queue successfully created."
+        message = "Queue and consumer successfully created."
     except Exception as e:
         code = 500
-        message = "An error occurred while creating the queue. " + str(e)
+        message = "An error occurred while creating the queue and consumer. " + str(e)
 
     return jsonify(
         {
@@ -85,6 +86,21 @@ def join_room_chat(room_id, user_id):
             "message": message
         }
     ), code
+
+def callback(channel, method, properties, body): # required signature for the callback; no return
+    print("\nReceived a message from " + __file__)
+    processMessage(body)
+    print() # print a new line feed
+
+def processMessage(body):
+    print("Printing the message:")
+    try:
+        message_body = json.loads(body)
+        print("--JSON:", message_body)
+    except Exception as e:
+        print("--NOT JSON:", e)
+        print("--DATA:", message_body)
+    print()
 
 
 # function to publish a sent message to the exchange
@@ -106,13 +122,14 @@ def send_message(room_id, user_id, content):
             "code": code,
             "data": {
                 "exchange_name": exchange_name,
+                "queue_name": queue_name,
                 "content": content
             },
             "message": message
         }
     ), code
 
-# NOTE: add function to receive message later
+
 
 if __name__ == "__main__":
     app.run(port=5003, debug=True)
