@@ -32,6 +32,8 @@ class Activity_Log(db.Model):
         return {"activity_id": self.activity_id, "description": self.description, "timestamp": self.timestamp}
 
 
+@app.route("/activity_log", methods=['POST'])
+
 def receiveOrderLog():
     amqp_setup.check_setup()
     queue_name = 'Activity_Log'    
