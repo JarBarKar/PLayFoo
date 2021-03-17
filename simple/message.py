@@ -44,7 +44,7 @@ def create_room_chat(room_id):
     exchange_name= str(room_id) + "_roomchat"
 
     try:
-        amqp_setup.create_exchange(exchange_name)
+        amqp_setup.create_exchange(exchange_name, exchange_type="fanout")
         code = 200
         message = "Exchange successfully created."
     except Exception as e:
@@ -55,60 +55,20 @@ def create_room_chat(room_id):
         {
             "code": code,
             "data": {
-                "exchange_name": exchange_name
-            },
-            "message": message
-        }
-    ), code
-
-
-# function to create a queue for a user in an exchange of the room chat they joined
-@app.route('/message/join/<int:room_id>&<string:user_id>', methods=['POST'])
-def join_room_chat(room_id, user_id):
-    exchange_name= str(room_id) + "_roomchat"
-    queue_name = user_id + "_queue"
-    try:
-        amqp_setup.create_queue(exchange_name, queue_name)
-        amqp_setup.receive_messages(queue_name, callback)
-        code = 200
-        message = "Queue and consumer successfully created."
-    except Exception as e:
-        code = 500
-        message = "An error occurred while creating the queue and consumer. " + str(e)
-
-    return jsonify(
-        {
-            "code": code,
-            "data": {
                 "exchange_name": exchange_name,
-                "queue_name": queue_name
             },
             "message": message
         }
     ), code
-
-def callback(channel, method, properties, body): # required signature for the callback; no return
-    print("\nReceived a message from " + __file__)
-    processMessage(body)
-    print() # print a new line feed
-
-def processMessage(body):
-    print("Printing the message:")
-    try:
-        message_body = json.loads(body)
-        print("--JSON:", message_body)
-    except Exception as e:
-        print("--NOT JSON:", e)
-        print("--DATA:", message_body)
-    print()
-
 
 # function to publish a sent message to the exchange
-@app.route('/message/send/<int:room_id>&<string:user_id>&<string:content>', methods=['POST'])
-def send_message(room_id, user_id, content):
+@app.route('/message/send/<int:room_id>&<string:user_id>', methods=['POST'])
+def publish_message(room_id, user_id):
     # NOTE: currently we are treating queue_name as the routing key (see amqp_setup), might want to modify later
     exchange_name = str(room_id) + "_roomchat"
     queue_name = user_id + "_queue"
+    content = json.dumps(request.get_json())
+    print(content)
     try:
         amqp_setup.send_message(exchange_name, queue_name, content)
         code = 200
