@@ -1,5 +1,11 @@
 message.py:
     1. Message Class for creating message database table
     2. create_room_chat function: creates an AMQP fanout exchange for new chatroom
-    3. join_room_chat function: creates a queue for user at a chatroom's exchange when user joins room
-    4. send_message (publishes message to exchange)
+    3. publish_message (publishes message to exchange)
+
+    to-do: database storage for messages.
+
+message_receiver.py:
+    1. join_room_chat function: creates a queue for user at a chatroom's exchange when user joins room and consumes from that queue
+
+    to-do: more in-depth processing for received messages.
