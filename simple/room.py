@@ -32,7 +32,7 @@ class Room(db.Model):
 
 class Member(db.Model):
     __tablename__ = 'member'
-    user_id = db.Column(db.String(12), primary_key=True)
+    user_id = db.Column(db.String(100), primary_key=True)
     room_id = db.Column(db.Integer(), primary_key=True)
 
 
@@ -66,12 +66,12 @@ def get_room(game_id):
 #Create Room
 @app.route("/room", methods=['POST'])
 def create_room():
-    #json file sent here
     data = request.get_json()
     room = Room(**data)
-
+    member = Member(room.host_id,room.room_id)
     try:
         db.session.add(room)
+        db.session.add(member)
         db.session.commit()
     except:
         return jsonify(
@@ -94,46 +94,50 @@ def create_room():
 #Join Room
 @app.route("/room/<string:room_id>", methods=['POST'])
 def join_room(room_id):
-    selected_room = Room.query.filter_by(room_id=room_id)
-    no_of_members = len(Member.query.filter_by(room_id=room_id))
-    if selected_room['capacity']==no_of_members:
+    selected_room = Room.query.filter_by(room_id=room_id).first()
+    no_of_members = Member.query.filter_by(room_id=room_id).count()
+    if no_of_members==selected_room.capacity:
         return jsonify(
             {
                 "code" : 500,
                 "message" : "Room is full"
             }
         )
+    #Get user id via request
     else:
         data = request.get_json()
-        room = Room(**data)
+        member = Member(**data)
 
     try:
-        db.session.add(room)
+        db.session.add(member)
         db.session.commit()
     except:
         return jsonify(
             {
                 "code": 500,
                 "data": {
-                    "room": room
+                    "user_id": member.user_id,
+                    "room": member.room_id
                     },
                 "message": "An error occurred joining the room."
             }
         ), 500
 
+    #did not return valid response but code is loaded in DB
     return jsonify(
         {
             "code": 201,
-            "data": room.json()
+            "data": member.json()
         }
     ), 201
 
 
 #Leave Room
-@app.route("/room/<string:user_id>", methods=['DELETE'])
-def leave_room(user_id):
+@app.route("/room/<string:user_id>&<string:room_id>", methods=['DELETE'])
+def leave_room(user_id,room_id):
+    selected_room = Room.query.filter_by(room_id=room_id).first()
     try:
-        deleted_user = Member.query.filter_by(user_id=user_id)
+        deleted_user = Member.query.filter_by(user_id=user_id).first()
         db.session.delete(deleted_user)
         db.session.commit()
     except:
@@ -141,15 +145,15 @@ def leave_room(user_id):
             {
                 "code": 500,
                 "data": {
-                    "room": room
+                    "room": selected_room.json()
                     },
                 "message": "An error occurred leaving the room. Please try again."
             }
         ), 500
     return jsonify(
     {
-        "code": 201,
-        "data": room.json(),
+        "code": 204,
+        "data": selected_room.json(),
         "message": "Successfully leave room"
         }
     ), 201
