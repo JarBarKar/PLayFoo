@@ -90,6 +90,7 @@ def create_room():
         {
             "code": 201,
             "data": room.json()
+            "message": "Room is successfully created."
         }
     ), 201
 

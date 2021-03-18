@@ -18,22 +18,23 @@ class Activity_Log(db.Model):
     __tablename__ = 'activity_log'
     activity_id = db.Column(db.Integer(), primary_key=True)
     description = db.Column(db.String(128), nullable=False)
+    code = db.Column(db.Integer(), nullable=False)
     timestamp= db.Column(db.DateTime, server_default=db.func.now())
 
     
 
-    def __init__(self, activity_id, description, timestamp):
+    def __init__(self, activity_id, description, code, timestamp):
         self.activity_id = activity_id
         self.description = description
+        self.code = code
         self.timestamp = timestamp
 
 
     def json(self):
-        return {"activity_id": self.activity_id, "description": self.description, "timestamp": self.timestamp}
+        return {"activity_id": self.activity_id, "description": self.description, "code": self.code, "timestamp": self.timestamp}
 
 
 @app.route("/activity_log", methods=['POST'])
-
 def receiveOrderLog():
     amqp_setup.check_setup()
     queue_name = 'Activity_Log'    
@@ -53,6 +54,7 @@ def processOrderLog(order):
 
 
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
+    app.run(port=5005, debug=True)
     print("\nThis is " + os.path.basename(__file__), end='')
     print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
-    receiveOrderLog()
+    
