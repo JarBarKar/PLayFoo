@@ -5,4 +5,4 @@ Simple Microservices:
     5001: room.py
     5002: game.py
     5003: message.py
-    5004: activity_log.py
+    5004: message_receiver.py

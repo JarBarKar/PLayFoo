@@ -14,11 +14,11 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-def create_exchange(exchange_name):
+def create_exchange(exchange_name, exchange_type):
     # Set up the exchange if the exchange doesn't exist
     # - use a 'fanout' exchange to enable interaction
-    exchangetype="fanout"
-    return channel.exchange_declare(exchange=exchange_name, exchange_type=exchangetype, durable=True)
+    exchange_type="fanout"
+    return channel.exchange_declare(exchange=exchange_name, exchange_type=exchange_type, durable=True)
         # 'durable' makes the exchange survive broker restarts
 
 def create_queue(exchange_name, queue_name):
@@ -35,7 +35,8 @@ def send_message(exchange_name, queue_name, content):
     return channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=queue_name)
 
 def receive_messages(queue_name, callback):
-    return channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+    return channel.start_consuming()
 
 """
 This function in this module sets up a connection and a channel to a local AMQP broker,

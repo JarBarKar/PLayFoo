@@ -1,5 +1,7 @@
 amqp_setup.py:
     1. defines channel, connection, exchange and queue properties
-    2. create_exchange function: create new exchange by providing room_id to set exchange name as room_id_fanout (whenever a new room is created)
-    3. create_queue function: create new queue by providing user_id as routing key (whenever a user joins a room chat) (routing key is mostly a formality since exchange is fanout)
-    4. check_setup gets channel, connection running
+    2. create_exchange function
+    3. create_queue function
+    4. send_message
+    5. receive_messages
+    6. check_setup gets channel, connection running
