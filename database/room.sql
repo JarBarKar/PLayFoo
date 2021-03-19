@@ -53,16 +53,10 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
-
--- Database: `room`
---
-CREATE DATABASE IF NOT EXISTS `member` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `member`;
-
 -- --------------------------------------------------------
 
 --
--- Table structure for table `roomr`
+-- Table structure for table `member`
 --
 
 DROP TABLE IF EXISTS `member`;
@@ -73,10 +67,10 @@ CREATE TABLE IF NOT EXISTS `member` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `user`
+-- Dumping data for table `member`
 --
 
-INSERT INTO `room` (`room_id`, `room_name`, `game_id`, `capacity`, `host_id`) VALUES
-(1, 'First room everrrr', 265, 24, 'edwinlzs'),
-(2, 'Second room everrrr', 10, 2, 'weeb');
+INSERT INTO `member` (`room_id`, `user_id`) VALUES
+(1, 'edwinlzs'),
+(2, 'weeb');
 COMMIT;

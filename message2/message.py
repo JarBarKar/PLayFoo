@@ -4,8 +4,7 @@ from flask_cors import CORS
 
 import json
 import amqp_setup
-
-from threading import Thread
+import pika
 
 app = Flask(__name__)
 CORS(app)
@@ -40,40 +39,38 @@ class Message(db.Model):
         return {"message_id":self.message_id, "room_id":self.room_id, "user_id":self.user_id, "content":self.content}
 
 # function to create an exchange for a specific room's chat whenever a room is created
-# @app.route('/message/create/<int:room_id>', methods=['POST'])
-# def create_room_chat(room_id):
-#     exchange_name= str(room_id) + "_roomchat"
+@app.route('/message/create/<int:room_id>', methods=['POST'])
+def create_room_chat(room_id):
+    exchange_name= str(room_id) + "_roomchat"
+    exchange_type= "fanout"
+    try:
+        amqp_setup.channel.exchange_declare(exchange=exchange_name, exchange_type=exchange_type, durable=True)
+        code = 200
+        message = "Exchange successfully created."
+    except Exception as e:
+        code = 500
+        message = "An error occurred while creating the exchange. " + str(e)
 
-#     try:
-#         amqp_setup.create_exchange(exchange_name, exchange_type="fanout")
-#         code = 200
-#         message = "Exchange successfully created."
-#     except Exception as e:
-#         code = 500
-#         message = "An error occurred while creating the exchange. " + str(e)
-
-#     return jsonify(
-#         {
-#             "code": code,
-#             "data": {
-#                 "exchange_name": exchange_name,
-#             },
-#             "message": message
-#         }
-#     ), code
+    return jsonify(
+        {
+            "code": code,
+            "data": {
+                "exchange_name": exchange_name,
+            },
+            "message": message
+        }
+    ), code
 
 # function to create a queue for a user in an exchange of the room chat they joined
 @app.route('/message/join/<int:room_id>&<string:user_id>', methods=['POST'])
 def join_room_chat(room_id, user_id):
-    exchange_name= "chatrooms"
+    exchange_name= str(room_id) + "_roomchat"
     queue_name = user_id + "_queue"
     routing_key = str(room_id) + "." + user_id
     try:
-        amqp_setup.create_queue(exchange_name=exchange_name, queue_name=queue_name, routing_key=routing_key)
+        amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
+        amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
         code = 200
-        # use Thread to run the channel.start_consuming loop while code can go on to return message
-        t = Thread(target=amqp_setup.receive_messages, args=(queue_name, callback))
-        t.start()
         message = "Queue successfully created and now listening for messages."
 
     except Exception as e:
@@ -92,7 +89,7 @@ def join_room_chat(room_id, user_id):
         }
     ), code
 
-# defines what to do when receiving message
+# defines what to do when receiving a message
 def callback(channel, method, properties, body): # required signature for the callback; no return
     print("\nReceived a message from " + __file__)
     processMessage(body)
@@ -109,15 +106,15 @@ def processMessage(body):
         print("--DATA:", body)
     print()
 
-# function to publish a sent message to the exchange
+# function to publish a sent message to the exchange of the room chat
 @app.route('/message/send/<int:room_id>&<string:user_id>', methods=['POST'])
 def publish_message(room_id, user_id):
     # NOTE: currently we are treating queue_name as the routing key (see amqp_setup), might want to modify later
-    exchange_name = "chatrooms"
+    exchange_name = str(room_id) + "_roomchat"
     routing_key = str(room_id) + ".*"
     content = json.dumps(request.get_json())
     try:
-        amqp_setup.send_message(exchange_name, routing_key, content)
+        amqp_setup.channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
         code = 200
         message = "Message successfully sent."
     except Exception as e:
@@ -136,7 +133,52 @@ def publish_message(room_id, user_id):
         }
     ), code
 
+# function to close queue of user when leaving room chat
+@app.route('/message', methods=['DELETE'])
+def leave_room_chat():
 
+    content = request.get_json()
+    room_id = content['room_id']
+    user_id = content['user_id']
+    # user_is_host = content['user_is_host']
+    user_is_host = False
+
+    exchange_name= str(room_id) + "_roomchat"
+    queue_name = user_id + "_queue"
+
+    if user_is_host: # user is the host, we need to remove everyone from the room by deleting their queues
+        room_user_ids = content['room_user_ids']
+        try:
+            for user_id in room_user_ids:
+                queue_name = user_id + "_queue"
+                amqp_setup.channel.queue_date(queue=queue_name)
+            amqp_setup.channel.exchange_delete(exchange=exchange_name)
+            code = 200
+            message = "Queues and exchange successfully deleted."
+        except Exception as e:
+            code = 500
+            message = "An error occurred while deleting the queue. " + str(e)
+    else: # user is not the host, only have to delete user's queue
+        try:
+            amqp_setup.channel.queue_delete(queue=queue_name)
+            code = 200
+            message = "Queue successfully deleted."
+
+        except Exception as e:
+            code = 500
+            message = "An error occurred while deleting the queue. " + str(e)
+
+
+    return jsonify(
+        {
+            "code": code,
+            "data": {
+                "exchange_name": exchange_name,
+                "queue_name": queue_name,
+            },
+            "message": message
+        }
+    ), code
 
 if __name__ == "__main__":
     app.run(port=5003, debug=True)

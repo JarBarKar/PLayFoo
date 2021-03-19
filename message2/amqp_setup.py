@@ -14,30 +14,17 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-# Set up the exchange if the exchange doesn't exist
-# - use a 'fanout' exchange to enable interaction
-exchange_name="chatrooms"
-exchange_type="topic"
-channel.exchange_declare(exchange=exchange_name, exchange_type=exchange_type, durable=True)
-        # 'durable' makes the exchange survive broker restarts
+# channel command list:
+# 1. exchange_declare(exchange, exchange_type, durable)
+# 2. exchange_delete(exchange)
+# 3. queue_declare(queue, durable)
+# 4. queue_bind(exchange, queue, routing_key)
+# 5. queue_unbind(queue, exchange, routing_key)
+# 6. queue_delete(queue)
+# 7. basic_publish(exchange, body, properties, routing key)
+# 8. basic_consume(queue, on_message_callback, auto_ack)
+# 9. start_consuming()
 
-def create_queue(exchange_name, queue_name, routing_key):
-    ############   Message queue   #############
-    #delcare Message queue
-    channel.queue_declare(queue=queue_name, durable=True)
-        # 'durable' makes the queue survive broker restarts
-
-    #bind Message queue
-    return channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key) 
-        # bind the queue to the exchange via the key
-
-def send_message(exchange_name, routing_key, content):
-    return channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
-
-def receive_messages(queue_name, callback):
-    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    return channel.start_consuming()
-    
 """
 This function in this module sets up a connection and a channel to a local AMQP broker,
 and declares a 'fanout' exchange to be used by the microservices in the solution.

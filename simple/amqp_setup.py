@@ -14,7 +14,7 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-def create_exchange(exchange_name, exchange_type):
+def create_exchange(exchange_name):
     # Set up the exchange if the exchange doesn't exist
     # - use a 'fanout' exchange to enable interaction
     exchange_type="fanout"
