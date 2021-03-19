@@ -53,21 +53,19 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
---
--- Table structure for table `member`
---
 
 DROP TABLE IF EXISTS `member`;
 CREATE TABLE IF NOT EXISTS `member` (
   `room_id` int(6) NOT NULL AUTO_INCREMENT,
-  `user_id` VARCHAR(100) NOT NULL,
+  `user_id` VARCHAR(128) NOT NULL,
   PRIMARY KEY (`room_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `user`
+-- Dumping data for table `member`
 --
 
 INSERT INTO `member` (`room_id`, `user_id`) VALUES
-(1, 'gaylord');
+(1, 'virgin_slayer'),
+(2, 'eyeofthelion');
 COMMIT;

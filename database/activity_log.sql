@@ -33,9 +33,9 @@ USE `activity_log`;
 DROP TABLE IF EXISTS `activity_log`;
 CREATE TABLE IF NOT EXISTS `activity_log` (
   `activity_id` int(6) NOT NULL AUTO_INCREMENT,
-  `description` varchar(128) NULL,
+  `description` varchar(64) NOT NULL,
   `code` int(3) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`activity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -43,11 +43,8 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
 -- Dumping data for table `room`
 --
 
-INSERT INTO `activity_log` (`activity_id`, `description`, `code`) VALUES
-(1, 'Destroyed bowser', 202),
-(2, 'Sacrifice Sasha' , 500);
+INSERT INTO `activity_log` (`activity_id`, `description`, `code`, `timestamp`) VALUES
+(1, 'Joined a Room', 200, CURRENT_TIMESTAMP()),
+(2, 'Failed room joining. Damn!', 502, CURRENT_TIMESTAMP());
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
