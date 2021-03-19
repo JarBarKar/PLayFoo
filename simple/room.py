@@ -32,7 +32,7 @@ class Room(db.Model):
 
 class Member(db.Model):
     __tablename__ = 'member'
-    user_id = db.Column(db.String(100), primary_key=True)
+    user_id = db.Column(db.String(128), primary_key=True)
     room_id = db.Column(db.Integer(), primary_key=True)
 
 
