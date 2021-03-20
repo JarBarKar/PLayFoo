@@ -112,7 +112,7 @@ def processCreateRoom(room):
 
     # 7. Return error
         return {
-            "code": 400201,
+            "code": 201,
             "data": {
                 "room_result": room_result,
             },
