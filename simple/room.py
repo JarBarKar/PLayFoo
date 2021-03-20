@@ -64,8 +64,12 @@ def get_room(game_id):
     ), 404
 
 #Create Room
+
 #For this section, some changes r made. When room is created. Both room and member tables will be updated. 
 # Unless someone can point to me how to use foreign key
+#{"room_id": room_id, "room_name": room_name, "capacity": capacity,
+#  "game_id":game_id, "host_id": host_id}
+
 @app.route("/room", methods=['POST'])
 def create_room():
     data = request.get_json()
@@ -89,7 +93,7 @@ def create_room():
     return jsonify(
         {
             "code": 201,
-            "data": room.json()
+            "data": room.json(),
             "message": "Room is successfully created."
         }
     ), 201

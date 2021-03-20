@@ -14,29 +14,25 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-#for activity_log
-channel.exchange_declare(exchange='activity_log_exchange',exchange_type='topic', durable=True)
-channel.queue_declare(queue='activity_log_queue', durable=True) 
-channel.queue_bind(exchange='activity_log_exchange', queue='activity_log_queue', routing_key='#')
 
 def create_exchange(exchange_name, exchange_type):
     # Set up the exchange if the exchange doesn't exist
     # - use a 'fanout' exchange to enable interaction
-    exchange_type="fanout"
+    #exchange_type="fanout"
     return channel.exchange_declare(exchange=exchange_name, exchange_type=exchange_type, durable=True)
         # 'durable' makes the exchange survive broker restarts
 
-def create_queue(exchange_name, queue_name):
+def create_queue(exchange_name, queue_name, routing_key):
     ############   Message queue   #############
     #delcare Message queue
     channel.queue_declare(queue=queue_name, durable=True)
         # 'durable' makes the queue survive broker restarts
 
     #bind Message queue
-    return channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key="#") 
+    return channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key) 
         # bind the queue to the exchange via the key
 
-def send_message(exchange_name, queue_name, content):
+def send_message(exchange_name, routing_key, content):
     return channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=queue_name)
 
 def receive_messages(queue_name, callback):

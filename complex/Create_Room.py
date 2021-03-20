@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 import os, sys
-
+sys.path.insert(0, '../simple')
 import requests
 from invokes import invoke_http
 
@@ -22,10 +22,16 @@ activity_log_URL = "http://localhost:5005/activity_log"
 
 
 #Create Room (must send via JSON REQUEST)
+
+#{"room_id": room_id, "room_name": room_name, "capacity": capacity,
+#  "game_id":game_id, "host_id": host_id}
+
 @app.route("/create_room", methods=['POST'])
 def create_room():
     # Simple check of input format and data of the request are JSON
+
     if request.is_json:
+        print('hello')
         try:
             room = request.get_json()
             print("\nReceived room details in JSON:", room)
@@ -46,7 +52,7 @@ def create_room():
 
             return jsonify({
                 "code": 500,
-                "message": "place_order.py internal error: " + ex_str
+                "message": "Create_Room.py internal error: " + ex_str
             }), 500
 
     # if reached here, not a JSON request.
@@ -57,58 +63,72 @@ def create_room():
 
 
 def processCreateRoom(room):
-    # 2. Send the order info {cart items}
-    # Invoke the order microservice
-    print('\n-----Invoking create_room microservice-----')
+    # 2. Setting up amqp between publisher and subscriber for create_room and activity_log
+    print('\n-----Sending request to room.py to create room-----')
     room_result = invoke_http(room_URL, method='POST', json=room)
+
+    # 3. Setting up amqp between publisher and subscriber for create_room and activity_log
+    print('\n-----Setting up subscriber queue for activity_log microservice-----')
+
+    amqp_setup.check_setup()
+    room_result = invoke_http(activity_log_URL, method='POST')
+
+    print('\n-----Setting up exchange broker to publish messages-----')
+    exchange_name = 'activity_log_exchange'
+    queue_name = 'activity_log_queue'
+    routing_key = '#'
+
+    amqp_setup.create_exchange(exchange_name=exchange_name, exchange_type='topic')
+    amqp_setup.send_message(exchange_name=exchange_name, routing_key=routing_key, content=room)
+
     print('room_result:', room_result)
   
 
-    # Check the order result; if a failure, send it to the error microservice.
-    code = room_result["code"]
-    message = json.dumps(room_result)
+    # # Check the result; if a failure, send it to the error microservice.
+    # code = room_result["code"]
+    # message = json.dumps(room_result)
 
-    if code not in range(200, 300):
-        # Inform the error microservice
-        #print('\n\n-----Invoking error microservice as order fails-----')
-        print('\n\n-----Publishing the (order error) message with routing_key=room.error-----')
+    # if code not in range(200, 300):
+    #     # Inform the error microservice
+    #     #print('\n\n-----Invoking error microservice as order fails-----')
+    #     print('\n\n-----Publishing the (order error) message with routing_key=room.error-----')
 
-        # invoke_http(error_URL, method="POST", json=order_result)
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="room.error", 
-            body=message, properties=pika.BasicProperties(delivery_mode = 2)) 
-        # make message persistent within the matching queues until it is received by some receiver 
-        # (the matching queues have to exist and be durable and bound to the exchange)
+    #     # invoke_http(error_URL, method="POST", json=order_result)
+    #     amqp_setup.basic_publish(exchange=amqp_setup.exchangename, routing_key="room.error", 
+    #         body=message, properties=pika.BasicProperties(delivery_mode = 2)) 
+    #     # make message persistent within the matching queues until it is received by some receiver 
+    #     # (the matching queues have to exist and be durable and bound to the exchange)
 
-        # - reply from the invocation is not used;
-        # continue even if this invocation fails        
-        print("\nOrder status ({:d}) published to the RabbitMQ Exchange:".format(
-            code), room_result)
+    #     # - reply from the invocation is not used;
+    #     # continue even if this invocation fails        
+    #     print("\nOrder status ({:d}) published to the RabbitMQ Exchange:".format(
+    #         code), room_result)
 
-        # Return error when room creation failed
-        return {
-            "code": 500,
-            "data": {"room_result": room_result},
-            "message": "Room creation failed."
-        }
+    #     # Return error when room creation failed
+    #     return {
+    #         "code": 500,
+    #         "data": {"room_result": room_result},
+    #         "message": "Room creation failed."
+    #     }
 
-    # Notice that we are publishing to "Activity Log" only when there is no error in order creation.
-    # In http version, we first invoked "Activity Log" and then checked for error.
-    # Since the "Activity Log" binds to the queue using '#' => any routing_key would be matched 
-    # and a message sent to “Error” queue can be received by “Activity Log” too.
+    # # Notice that we are publishing to "Activity Log" only when there is no error in order creation.
+    # # In http version, we first invoked "Activity Log" and then checked for error.
+    # # Since the "Activity Log" binds to the queue using '#' => any routing_key would be matched 
+    # # and a message sent to “Error” queue can be received by “Activity Log” too.
 
-    else:
-        # 4. Record new order
-        # record the activity log anyway
-        #print('\n\n-----Invoking activity_log microservice-----')
-        print('\n\n-----Publishing the (room info) message with routing_key=room.info-----')        
+    # else:
+    #     # 4. Record new order
+    #     # record the activity log anyway
+    #     #print('\n\n-----Invoking activity_log microservice-----')
+    #     print('\n\n-----Publishing the (room info) message with routing_key=room.info-----')        
 
-        # invoke_http(activity_log_URL, method="POST", json=order_result)            
-        amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="room.info", 
-            body=message)
+    #     # invoke_http(activity_log_URL, method="POST", json=order_result)            
+    #     amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="room.info", 
+    #         body=message)
     
-    print("\nOrder published to RabbitMQ Exchange.\n")
-    # - reply from the invocation is not used;
-    # continue even if this invocation fails
+    # print("\nOrder published to RabbitMQ Exchange.\n")
+    # # - reply from the invocation is not used;
+    # # continue even if this invocation fails
 
     # 7. Return error
         return {
@@ -118,13 +138,21 @@ def processCreateRoom(room):
             },
             "message": "Room creation successful."
         }
+    # # 7. Return error
+    #     return {
+    #         "code": 400201,
+    #         "data": {
+    #             "room_result": room_result,
+    #         },
+    #         "message": "Room creation successful."
+    #     }
 
 
 
 # Execute this program if it is run as a main script (not by 'import')
 if __name__ == "__main__":
     print("This is flask " + os.path.basename(__file__) + " for creating a room...")
-    app.run(host="0.0.0.0", port=5100, debug=True)
+    app.run(port=5100, debug=True)
     # Notes for the parameters: 
     # - debug=True will reload the program automatically if a change is detected;
     #   -- it in fact starts two instances of the same flask program, and uses one of the instances to monitor the program changes;

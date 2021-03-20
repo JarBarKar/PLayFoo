@@ -35,6 +35,40 @@ class Activity_Log(db.Model):
 
 
 @app.route("/activity_log", methods=['POST'])
+def activity_log_receive():
+    amqp_setup.check_setup()
+    exchange_name = 'activity_log_exchange'
+    queue_name = 'activity_log_queue'
+    routing_key = '#'
+    # set up a consumer and start to wait for coming messages
+    amqp_setup.create_queue(exchange_name, queue_name,routing_key)
+    amqp_setup.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+    amqp_setup.start_consuming() # an implicit loop waiting to receive messages; 
+    #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
+
+def callback(channel, method, properties, body): # required signature for the callback; no return
+    print("\nReceived an order log by " + __file__)
+    processOrderLog(json.loads(body))
+    print() # print a new line feed
+
+def processOrderLog(order):
+    try:
+        db.session.add(member)
+        db.session.commit()
+        print("Recording an order log:")
+        print(order)
+    except:
+        return jsonify(
+            {
+                "code": 500,
+                "data": {
+                    "user_id": member.user_id,
+                    "room": member.room_id
+                    },
+                "message": "An error occurred joining the room."
+            }
+        ), 500
+
 # def activity_log_receive():
 #     exchange_name= "activity_log_exchange"
 #     queue_name = "activity_log_queue"
@@ -80,41 +114,8 @@ class Activity_Log(db.Model):
 #         print("--DATA:", body)
 #     print()
 
-def activity_log_receive():
-    amqp_setup.check_setup()
-    queue_name = 'activity_log_queue'
-    # set up a consumer and start to wait for coming messages
-    amqp_setup.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
-    #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
-
-def callback(channel, method, properties, body): # required signature for the callback; no return
-    print("\nReceived an order log by " + __file__)
-    processOrderLog(json.loads(body))
-    print() # print a new line feed
-
-def processOrderLog(order):
-    try:
-        db.session.add(member)
-        db.session.commit()
-        print("Recording an order log:")
-        print(order)
-    except:
-        return jsonify(
-            {
-                "code": 500,
-                "data": {
-                    "user_id": member.user_id,
-                    "room": member.room_id
-                    },
-                "message": "An error occurred joining the room."
-            }
-        ), 500
-
-
-
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
     app.run(port=5005, debug=True)
     print("\nThis is " + os.path.basename(__file__), end='')
-    print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
+    # print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
     
