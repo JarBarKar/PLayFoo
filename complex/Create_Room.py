@@ -30,30 +30,28 @@ activity_log_URL = "http://localhost:5005/activity_log"
 def create_room():
     # Simple check of input format and data of the request are JSON
 
-    if request.is_json:
-        print('hello')
-        try:
-            room = request.get_json()
-            print("\nReceived room details in JSON:", room)
+    try:
+        room = request.get_json()
+        print("\nReceived room details in JSON:", room)
 
-            # do the actual work
-            # 1. Send room info
-            result = processCreateRoom(room)
-            print('\n------------------------')
-            print('\nresult: ', result)
-            return jsonify(result), result["code"]
+        # do the actual work
+        # 1. Send room info
+        result = processCreateRoom(room)
+        print('\n------------------------')
+        print('\nresult: ', result)
+        return jsonify(result), result["code"]
 
-        except Exception as e:
-            # Unexpected error in code
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
-            print(ex_str)
+    except Exception as e:
+        # Unexpected error in code
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+        print(ex_str)
 
-            return jsonify({
-                "code": 500,
-                "message": "Create_Room.py internal error: " + ex_str
-            }), 500
+        return jsonify({
+            "code": 500,
+            "message": "Create_Room.py internal error: " + ex_str
+        }), 500
 
     # if reached here, not a JSON request.
     return jsonify({
@@ -62,15 +60,13 @@ def create_room():
     }), 400
 
 
-def processCreateRoom(room):
+def processCreateRoom(content):
     # 2. Setting up amqp between publisher and subscriber for create_room and activity_log
     print('\n-----Sending request to room.py to create room-----')
-    room_result = invoke_http(room_URL, method='POST', json=room)
+    room_result = invoke_http(room_URL, method='POST', json=content)
 
     # 3. Setting up amqp between publisher and subscriber for create_room and activity_log
     print('\n-----Setting up subscriber queue for activity_log microservice-----')
-
-    amqp_setup.check_setup()
     room_result = invoke_http(activity_log_URL, method='POST')
 
     print('\n-----Setting up exchange broker to publish messages-----')
@@ -78,10 +74,25 @@ def processCreateRoom(room):
     queue_name = 'activity_log_queue'
     routing_key = '#'
 
-    amqp_setup.create_exchange(exchange_name=exchange_name, exchange_type='topic')
-    amqp_setup.send_message(exchange_name=exchange_name, routing_key=routing_key, content=room)
+    try:
+        amqp_setup.channel.exchange_declare(exchange_name=exchange_name, exchange_type='topic', durable=True)
+        amqp_setup.channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+        code = 200
+    except Exception as e:
+        code=500
+        message = "An error occurred while sending the message. " + str(e)
 
-    print('room_result:', room_result)
+        return 
+        {
+        "code": 201,
+        "data": 
+            {
+                "room_result": room_result
+            },
+        "message": "Room creation successful."
+        }
+
+
   
 
     # # Check the result; if a failure, send it to the error microservice.
@@ -131,13 +142,7 @@ def processCreateRoom(room):
     # # continue even if this invocation fails
 
     # 7. Return error
-        return {
-            "code": 201,
-            "data": {
-                "room_result": room_result,
-            },
-            "message": "Room creation successful."
-        }
+
     # # 7. Return error
     #     return {
     #         "code": 400201,
@@ -153,6 +158,7 @@ def processCreateRoom(room):
 if __name__ == "__main__":
     print("This is flask " + os.path.basename(__file__) + " for creating a room...")
     app.run(port=5100, debug=True)
+    amqp_setup.check_setup() # to make sure connection and channel are running
     # Notes for the parameters: 
     # - debug=True will reload the program automatically if a change is detected;
     #   -- it in fact starts two instances of the same flask program, and uses one of the instances to monitor the program changes;
