@@ -62,8 +62,13 @@ def create_room_chat(room_id):
     ), code
 
 # function to create a queue for a user in an exchange of the room chat they joined
-@app.route('/message/join/<int:room_id>&<string:user_id>', methods=['POST'])
-def join_room_chat(room_id, user_id):
+@app.route('/message/join', methods=['POST'])
+def join_room_chat():
+    request_info = request.get_json()
+
+    user_id = request_info['user_id']
+    room_id = request_info['room_id']
+    
     exchange_name= str(room_id) + "_roomchat"
     queue_name = user_id + "_queue"
     routing_key = str(room_id) + "." + user_id
@@ -71,11 +76,11 @@ def join_room_chat(room_id, user_id):
         amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
         amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
         code = 200
-        message = "Queue successfully created and now listening for messages."
+        message = "Queue successfully created."
 
     except Exception as e:
         code = 500
-        message = "An error occurred while creating the queue or listening for messages. " + str(e)
+        message = "An error occurred while creating the queue. " + str(e)
 
     return jsonify(
         {
@@ -137,20 +142,21 @@ def publish_message(room_id, user_id):
 @app.route('/message', methods=['DELETE'])
 def leave_room_chat():
 
-    content = request.get_json()
-    room_id = content['room_id']
-    user_id = content['user_id']
-    # user_is_host = content['user_is_host']
-    user_is_host = False
+    request_info = request.get_json()
+
+    user_id = request_info['user_id']
+    room_info = request_info['room_info']
+    room_id = room_info['room_id']
+    is_host = request_info['is_host']
 
     exchange_name= str(room_id) + "_roomchat"
     queue_name = user_id + "_queue"
 
-    if user_is_host: # user is the host, we need to remove everyone from the room by deleting their queues
-        room_user_ids = content['room_user_ids']
+    if is_host: # user is the host, we need to remove everyone from the room by deleting their queues
+        member_ids = request_info['member_ids']
         try:
-            for user_id in room_user_ids:
-                queue_name = user_id + "_queue"
+            for member_id in member_ids:
+                queue_name = member_id + "_queue"
                 amqp_setup.channel.queue_date(queue=queue_name)
             amqp_setup.channel.exchange_delete(exchange=exchange_name)
             code = 200
@@ -174,7 +180,7 @@ def leave_room_chat():
             "code": code,
             "data": {
                 "exchange_name": exchange_name,
-                "queue_name": queue_name,
+                "queue_name": queue_name
             },
             "message": message
         }

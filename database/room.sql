@@ -72,5 +72,8 @@ CREATE TABLE IF NOT EXISTS `member` (
 
 INSERT INTO `member` (`room_id`, `user_id`) VALUES
 (1, 'edwinlzs'),
-(2, 'weeb');
+(1, 'sugarbaby'),
+(2, 'weeb'),
+(2, 'test'),
+(2, 'aaron');
 COMMIT;

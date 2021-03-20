@@ -11,6 +11,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
+user_url = "http://localhost:5000/user"
 room_url = "http://localhost:5001/room"
 game_url = "http://localhost:5002/game"
 message_url = "http://localhost:5003/message"
@@ -22,7 +23,7 @@ def leave_room():
         try:
             # we expect room_id & user_id to be in request
             request_info = request.get_json()
-            print("\nReceived an order in JSON:", request_info)
+            print("\nReceived a leave request in JSON:", request_info)
 
             # do the actual work
             # 1. send room and user info
@@ -148,4 +149,4 @@ def processLeaveRoom(request_info):
     }
 
 if __name__ == "__main__":
-    app.run(port=5101, debug=True)
+    app.run(port=5102, debug=True)

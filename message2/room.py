@@ -102,7 +102,7 @@ def join_room(room_id):
         return jsonify(
             {
                 "code" : 500,
-                "message" : "Room is full"
+                "message" : "Room is full."
             }
         )
     #Get user id via request
@@ -119,17 +119,22 @@ def join_room(room_id):
                 "code": 500,
                 "data": {
                     "user_id": member.user_id,
-                    "room": member.room_id
+                    "room_id": member.room_id
                     },
                 "message": "An error occurred joining the room."
             }
         ), 500
 
-    #did not return valid response but code is loaded in DB
+    print('reached here')
+    print(member.json())
+
     return jsonify(
         {
             "code": 201,
-            "data": member.json()
+            "data": {
+                "user_id": member.user_id,
+                "room_id": member.room_id
+            }
         }
     ), 201
 
@@ -137,31 +142,58 @@ def join_room(room_id):
 #Leave Room
 @app.route("/room", methods=['DELETE'])
 def leave_room():
-    content = request.json()
-    room_id = content['room_id']
-    user_id = content['user_id']
+    request_info = request.get_json()
+    room_id = request_info['room_id']
+    user_id = request_info['user_id']
+
     selected_room = Room.query.filter_by(room_id=room_id).first()
-    try:
-        deleted_user = Member.query.filter_by(user_id=user_id).first()
-        db.session.delete(deleted_user)
-        db.session.commit()
-    except:
-        return jsonify(
-            {
-                "code": 500,
-                "data": {
-                    "room": selected_room.json()
-                    },
-                "message": "An error occurred leaving the room. Please try again."
-            }
-        ), 500
+
+    room_info = selected_room.json()
+    host_id = room_info['host_id']
+
+    data = {"user_id": user_id, "room_info": room_info} # to store room_info which will be returned later in response
+
+    if host_id != user_id: # user is not the host, regular procedures 
+        try:
+            data["is_host"] = False
+            deleted_user = Member.query.filter_by(user_id=user_id).first()
+            db.session.delete(deleted_user)
+            db.session.commit()
+
+            code = 201
+            message = "Successfully left room."
+        except Exception as e:
+            code = 500
+            message = "An error occurred leaving the room: " + str(e)
+    else: # user is the host, need to close entire room
+        try:
+            data["is_host"] = True
+            room_members = Member.query.filter_by(room_id=room_id).all() # filter for all members of the room
+            member_ids = []
+
+            for room_member in room_members: # delete all members from room
+                member_ids.append(room_member.user_id)
+                db.session.delete(room_member)
+
+            db.session.delete(selected_room) # delete room itself
+            db.session.commit()
+
+            code = 201
+            message = "Successfully left room."
+            data["member_ids"] = member_ids # return room_members in json response as well
+
+        except Exception as e:
+            code = 500
+            message = "An error occurred leaving the room: " + str(e)
+
+        
     return jsonify(
-    {
-        "code": 204,
-        "data": selected_room.json(),
-        "message": "Successfully leave room"
+        {
+            "code": code,
+            "data": data,
+            "message": message
         }
-    ), 201
+    ), code
 
 
 if __name__ == '__main__':
