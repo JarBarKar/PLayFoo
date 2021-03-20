@@ -21,12 +21,12 @@ def leave_room():
     if request.is_json:
         try:
             # we expect room_id & user_id to be in request
-            content = request.get_json()
-            print("\nReceived an order in JSON:", content)
+            request_info = request.get_json()
+            print("\nReceived an order in JSON:", request_info)
 
             # do the actual work
             # 1. send room and user info
-            result = processLeaveRoom(content)
+            result = processLeaveRoom(request_info)
             print('\n------------------------')
             print('\nresult: ', result)
             return jsonify(result), result["code"]
@@ -49,12 +49,12 @@ def leave_room():
         "message": "Invalid JSON input: " + str(request.get_data())
     }), 400
 
-def processLeaveRoom(content):
+def processLeaveRoom(request_info):
     # 2. Send the room and user info
     # Invoke the room microservice
     print('\n-----Invoking room microservice-----')
-    room_result = invoke_http(room_url, method='DELETE', json=content)
-    print('create_room_result:', room_result)
+    room_result = invoke_http(room_url, method='DELETE', json=request_info)
+    print('leave_room_result:', room_result)
 
     # Check the order result; if a failure, send it to the error microservice.
     code = room_result["code"]
@@ -107,8 +107,9 @@ def processLeaveRoom(content):
 
     print('\n\n-----Invoking message microservice-----')    
     
+    room_result_data = room_result['data']
     message_result = invoke_http(
-        message_url, method="DELETE", json=content)
+        message_url, method="DELETE", json=room_result_data)
     print("message_result:", message_result, '\n')
 
     # Check the shipping result;
