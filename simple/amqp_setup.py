@@ -14,6 +14,17 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
+# channel command list:
+# 1. exchange_declare(exchange, exchange_type, durable)
+# 2. exchange_delete(exchange)
+# 3. queue_declare(queue, durable)
+# 4. queue_bind(exchange, queue, routing_key)
+# 5. queue_unbind(queue, exchange, routing_key)
+# 6. queue_delete(queue)
+# 7. basic_publish(exchange, body, properties, routing key)
+# 8. basic_consume(queue, on_message_callback, auto_ack)
+# 9. start_consuming()
+
 """
 This function in this module sets up a connection and a channel to a local AMQP broker,
 and declares a 'fanout' exchange to be used by the microservices in the solution.
