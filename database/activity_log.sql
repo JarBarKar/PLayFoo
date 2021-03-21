@@ -33,8 +33,9 @@ USE `activity_log`;
 DROP TABLE IF EXISTS `activity_log`;
 CREATE TABLE IF NOT EXISTS `activity_log` (
   `activity_id` int(6) NOT NULL AUTO_INCREMENT,
-  `description` varchar(64) NOT NULL,
   `code` int(3) NOT NULL,
+  `data` varchar(1000) NOT NULL,
+  `message` varchar(128) NOT NULL,
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`activity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -43,8 +44,8 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
 -- Dumping data for table `room`
 --
 
-INSERT INTO `activity_log` (`activity_id`, `description`, `code`, `timestamp`) VALUES
-(1, 'Joined a Room', 200, CURRENT_TIMESTAMP()),
-(2, 'Failed room joining. Damn!', 502, CURRENT_TIMESTAMP());
+INSERT INTO `activity_log` (`activity_id`, `code`, `data`,`message`, `timestamp`) VALUES
+(1, 200 ,'123123','Joined a Room',  CURRENT_TIMESTAMP()),
+(2, 502, 'testgay', 'Failed room joining. Damn!', CURRENT_TIMESTAMP());
 COMMIT;
 

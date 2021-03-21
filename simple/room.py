@@ -79,9 +79,7 @@ def create_room():
         return jsonify(
             {
                 "code": 500,
-                "data": {
-                    "room": room
-                },
+                "data": room.json(),
                 "message": "An error occurred creating the room."
             }
         ), 500
@@ -89,8 +87,9 @@ def create_room():
     return jsonify(
         {
             "code": 201,
-            "data": room.json()
-        }
+            "data": room.json(),
+            "message": "Room has successfully been created"
+        },
     ), 201
 
 #Join Room

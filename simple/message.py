@@ -97,7 +97,7 @@ def join_room_chat():
 # defines what to do when receiving a message
 def callback(channel, method, properties, body): # required signature for the callback; no return
     print("\nReceived a message from " + __file__)
-    processMessage(body)
+    processMessage(json.loads(body))
     print() # print a new line feed
 
 # defines how exactly to process received message

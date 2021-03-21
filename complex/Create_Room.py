@@ -33,7 +33,6 @@ def create_room():
     try:
         room = request.get_json()
         print("\nReceived room details in JSON:", room)
-
         # do the actual work
         # 1. Send room info
         result = processCreateRoom(room)
@@ -61,39 +60,26 @@ def create_room():
 
 
 def processCreateRoom(content):
-    # 2. Setting up amqp between publisher and subscriber for create_room and activity_log
+    # 2. POST a request to create a room.
     print('\n-----Sending request to room.py to create room-----')
     room_result = invoke_http(room_URL, method='POST', json=content)
-
-    # 3. Setting up amqp between publisher and subscriber for create_room and activity_log
-    print('\n-----Setting up subscriber queue for activity_log microservice-----')
-    room_result = invoke_http(activity_log_URL, method='POST')
-
-    print('\n-----Setting up exchange broker to publish messages-----')
-    exchange_name = 'activity_log_exchange'
-    queue_name = 'activity_log_queue'
+    exchange_name = 'activity_error_exchange'
+    #for activity_log routing key
     routing_key = '#'
-
+    code = 201
+    message = 'Room creation successful'
     try:
-        amqp_setup.channel.exchange_declare(exchange_name=exchange_name, exchange_type='topic', durable=True)
-        amqp_setup.channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+        amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
         code = 200
     except Exception as e:
         code=500
         message = "An error occurred while sending the message. " + str(e)
 
-        return 
-        {
-        "code": 201,
-        "data": 
-            {
-                "room_result": room_result
-            },
-        "message": "Room creation successful."
-        }
-
-
-  
+    return {
+        "code": code,
+        "data": room_result,
+        "message": message
+    }
 
     # # Check the result; if a failure, send it to the error microservice.
     # code = room_result["code"]
@@ -159,6 +145,7 @@ if __name__ == "__main__":
     print("This is flask " + os.path.basename(__file__) + " for creating a room...")
     app.run(port=5100, debug=True)
     amqp_setup.check_setup() # to make sure connection and channel are running
+
     # Notes for the parameters: 
     # - debug=True will reload the program automatically if a change is detected;
     #   -- it in fact starts two instances of the same flask program, and uses one of the instances to monitor the program changes;
