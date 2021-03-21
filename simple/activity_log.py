@@ -40,12 +40,9 @@ def activity_log_receive():
     exchange_name = 'activity_log_exchange'
     queue_name = 'activity_log_queue'
     routing_key = '#'
-    # set up a consumer and start to wait for coming messages
-    amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
-    amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
+    #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
     amqp_setup.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
-    #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
 
 def callback(channel, method, properties, body): # required signature for the callback; no return
     print("\nReceived an order log by " + __file__)
@@ -128,7 +125,10 @@ def processOrderLog(order):
 
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
     app.run(port=5005, debug=True)
-    amqp_setup.check_setup() # to make sure connection and channel are running
+    amqp_setup.check_setup() # to make sure connection and channel are running    # set up a consumer and start to wait for coming messages
+    amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
+    amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
+
     print("\nThis is " + os.path.basename(__file__), end='')
     # print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
     
