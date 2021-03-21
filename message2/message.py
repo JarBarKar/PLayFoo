@@ -150,14 +150,13 @@ def leave_room_chat():
     is_host = request_info['is_host']
 
     exchange_name= str(room_id) + "_roomchat"
-    queue_name = user_id + "_queue"
 
     if is_host: # user is the host, we need to remove everyone from the room by deleting their queues
         member_ids = request_info['member_ids']
         try:
             for member_id in member_ids:
                 queue_name = member_id + "_queue"
-                amqp_setup.channel.queue_date(queue=queue_name)
+                amqp_setup.channel.queue_delete(queue=queue_name)
             amqp_setup.channel.exchange_delete(exchange=exchange_name)
             code = 200
             message = "Queues and exchange successfully deleted."
@@ -166,6 +165,7 @@ def leave_room_chat():
             message = "An error occurred while deleting the queue. " + str(e)
     else: # user is not the host, only have to delete user's queue
         try:
+            queue_name = user_id + "_queue"
             amqp_setup.channel.queue_delete(queue=queue_name)
             code = 200
             message = "Queue successfully deleted."

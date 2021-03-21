@@ -11,9 +11,9 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-user_url = "http://localhost:5000/user"
+# user_url = "http://localhost:5000/user"
 room_url = "http://localhost:5001/room"
-game_url = "http://localhost:5002/game"
+# game_url = "http://localhost:5002/game"
 message_url = "http://localhost:5003/message"
 
 @app.route('/leave', methods=['DELETE'])
@@ -58,8 +58,8 @@ def processLeaveRoom(request_info):
     print('leave_room_result:', room_result)
 
     # Check the order result; if a failure, send it to the error microservice.
-    code = room_result["code"]
-    message = json.dumps(room_result)
+    # code = room_result["code"]
+    # message = json.dumps(room_result)
 
     # if code not in range(200, 300):
     #     # Inform the error microservice

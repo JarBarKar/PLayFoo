@@ -11,9 +11,9 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-user_url = "http://localhost:5000/user"
+# user_url = "http://localhost:5000/user"
 room_url = "http://localhost:5001/room"
-game_url = "http://localhost:5002/game"
+# game_url = "http://localhost:5002/game"
 message_url = "http://localhost:5003/message"
 
 @app.route('/join', methods=['POST'])

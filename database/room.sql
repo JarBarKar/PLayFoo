@@ -62,7 +62,7 @@ COMMIT;
 DROP TABLE IF EXISTS `member`;
 CREATE TABLE IF NOT EXISTS `member` (
   `room_id` int(6) NOT NULL AUTO_INCREMENT,
-  `user_id` VARCHAR(12) NOT NULL,
+  `user_id` VARCHAR(128) NOT NULL,
   PRIMARY KEY (`room_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
