@@ -52,7 +52,5 @@ def processMessage(body):
         print("--DATA:", body)
     print()
 
-
-
 if __name__ == "__main__":
     app.run(port=5004, debug=True)

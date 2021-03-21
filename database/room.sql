@@ -53,6 +53,11 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `member`
+--
 
 DROP TABLE IF EXISTS `member`;
 CREATE TABLE IF NOT EXISTS `member` (
@@ -66,6 +71,9 @@ CREATE TABLE IF NOT EXISTS `member` (
 --
 
 INSERT INTO `member` (`room_id`, `user_id`) VALUES
-(1, 'virgin_slayer'),
-(2, 'eyeofthelion');
+(1, 'edwinlzs'),
+(1, 'sugarbaby'),
+(2, 'weeb'),
+(2, 'test'),
+(2, 'aaron');
 COMMIT;

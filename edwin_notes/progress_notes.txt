@@ -1,0 +1,3 @@
+need to make pika able to add new consumers (new user joins room) even while start_consuming is already running on another Thread (chat is already live)
+can consider firebase sdk if all else fails
+firebase + react requires google account logins
