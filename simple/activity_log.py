@@ -7,7 +7,7 @@ import amqp_setup
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/activity_log'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/playfoo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -42,7 +42,6 @@ def activity_log_receive():
     print('\n--Receiving data...--')
     data = request.get_json()
     data = json.loads(data)
-    code = data['data']
     activity_log = Activity_Log(code=data['code'],data=json.dumps(data['data']),message=data['message'])
     try:
         db.session.add(activity_log)

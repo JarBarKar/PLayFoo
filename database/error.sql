@@ -30,21 +30,21 @@ USE `playfoo`;
 -- Table structure for table `room`
 --
 
-DROP TABLE IF EXISTS `activity_log`;
-CREATE TABLE IF NOT EXISTS `activity_log` (
-  `activity_id` int(6) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `error`;
+CREATE TABLE IF NOT EXISTS `error` (
+  `error_id` int(6) NOT NULL AUTO_INCREMENT,
   `code` int(3) NOT NULL,
   `data` varchar(1000) NOT NULL,
   `message` varchar(128) NOT NULL,
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`activity_id`)
+  PRIMARY KEY (`error_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `room`
 --
 
-INSERT INTO `activity_log` (`activity_id`, `code`, `data`,`message`, `timestamp`) VALUES
+INSERT INTO `error` (`error_id`, `code`, `data`,`message`, `timestamp`) VALUES
 (1, 200 ,'123123','Joined a Room',  CURRENT_TIMESTAMP()),
 (2, 502, 'testgay', 'Failed room joining. Damn!', CURRENT_TIMESTAMP());
 COMMIT;

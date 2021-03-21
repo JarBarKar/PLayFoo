@@ -19,15 +19,14 @@ class Room(db.Model):
     host_id = db.Column(db.String(12), nullable=False)
     
 
-    def __init__(self, room_id, room_name, game_id, capacity, host_id):
-        self.room_id = room_id
+    def __init__(self, room_name, game_id, capacity, host_id):
         self.room_name = room_name
         self.game_id = game_id
         self.capacity = capacity
         self.host_id = host_id
 
     def json(self):
-        return {"room_id": self.room_id, "room_name": self.room_name, "capacity": self.capacity, "game_id":self.game_id, "host_id": self.host_id}
+        return {"room_name": self.room_name, "capacity": self.capacity, "game_id":self.game_id, "host_id": self.host_id}
 
 
 class Member(db.Model):
@@ -69,17 +68,20 @@ def get_room(game_id):
 @app.route("/room", methods=['POST'])
 def create_room():
     data = request.get_json()
-    room = Room(**data)
-    member = Member(room.host_id,room.room_id)
+
     try:
+        print(f'\n\n---Creating Room: {data["room_name"]}...---')
+        room = Room(room_name=data['room_name'],game_id=data['game_id'],capacity=data['capacity'],host_id=data['host_id'])
+        member = Member(room.host_id,room.room_id)
         db.session.add(room)
         db.session.add(member)
         db.session.commit()
     except:
+        print(f'\n\n---Cannot create Room: {data["room_name"]}...---')
         return jsonify(
             {
                 "code": 500,
-                "data": room.json(),
+                "data": data,
                 "message": "An error occurred creating the room."
             }
         ), 500
