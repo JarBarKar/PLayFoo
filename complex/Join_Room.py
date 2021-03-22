@@ -11,10 +11,10 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-# user_url = "http://localhost:5000/user"
-room_url = "http://localhost:5001/room"
-# game_url = "http://localhost:5002/game"
-message_url = "http://localhost:5003/message"
+# user_URL = "http://localhost:5000/user"
+room_URL = "http://localhost:5001/room"
+# game_URL = "http://localhost:5002/game"
+message_URL = "http://localhost:5003/message"
 
 @app.route('/join', methods=['POST'])
 def join_room():
@@ -55,14 +55,14 @@ def processJoinRoom(request_info):
     # Invoke the room microservice
     print('\n-----Invoking room microservice-----')
     room_id = request_info['room_id']
-    room_result = invoke_http(room_url + '/' + str(room_id), method='POST', json=request_info)
+    room_result = invoke_http(room_URL + '/' + str(room_id), method='POST', json=request_info)
     print('join_room_result:', room_result)
 
     print('\n\n-----Invoking message microservice-----')    
     
     room_result_data = room_result['data']
     message_result = invoke_http(
-        message_url + "/join", method="POST", json=room_result_data)
+        message_URL + "/join", method="POST", json=room_result_data)
     print("message_result:", message_result, '\n')
 
     return {

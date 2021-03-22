@@ -39,17 +39,25 @@ class Message(db.Model):
         return {"message_id":self.message_id, "room_id":self.room_id, "user_id":self.user_id, "content":self.content}
 
 # function to create an exchange for a specific room's chat whenever a room is created
-@app.route('/message/create/<int:room_id>', methods=['POST'])
-def create_room_chat(room_id):
+@app.route('/message/create', methods=['POST'])
+def create_room_chat():
+    request_info = request.get_json()
+    room_id = request_info['room_id']
+    host_id = request_info['room_info']['host_id']
+
     exchange_name= str(room_id) + "_roomchat"
     exchange_type= "fanout"
+    queue_name = host_id + "_queue"
+    routing_key = str(room_id) + "." + host_id
     try:
         amqp_setup.channel.exchange_declare(exchange=exchange_name, exchange_type=exchange_type, durable=True)
+        amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
+        amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
         code = 200
-        message = "Exchange successfully created."
+        message = "Exchange and queue successfully created."
     except Exception as e:
         code = 500
-        message = "An error occurred while creating the exchange. " + str(e)
+        message = "An error occurred while creating the exchange or queue. " + str(e)
 
     return jsonify(
         {

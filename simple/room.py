@@ -89,7 +89,10 @@ def create_room():
     return jsonify(
         {
             "code": 201,
-            "data": room.json(),
+            "data": {
+                "room_id": room.room_id,
+                "room_info": room.json()
+            },
             "message": "Room has successfully been created"
         },
     ), 201

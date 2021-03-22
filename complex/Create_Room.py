@@ -16,7 +16,7 @@ CORS(app)
 #user_URL = "http://localhost:5000/user"
 room_URL = "http://localhost:5001/room"
 # game_URL = "http://localhost:5002/game"
-#message_URL = "http://localhost:5003/"
+message_URL = "http://localhost:5003/message"
 activity_log_URL = "http://localhost:5004/activity_log"
 
 
@@ -28,28 +28,28 @@ activity_log_URL = "http://localhost:5004/activity_log"
 @app.route("/create_room", methods=['POST'])
 def create_room():
     # Simple check of input format and data of the request are JSON
+    if request.is_json:
+        try:
+            request_info = request.get_json()
+            print("\nReceived room details in JSON:", request_info)
+            # do the actual work
+            # 1. Send room info
+            result = processCreateRoom(request_info)
+            print('\n------------------------')
+            print('\nresult: ', result)
+            return jsonify(result), result["code"]
 
-    try:
-        room = request.get_json()
-        print("\nReceived room details in JSON:", room)
-        # do the actual work
-        # 1. Send room info
-        result = processCreateRoom(room)
-        print('\n------------------------')
-        print('\nresult: ', result)
-        return jsonify(result), result["code"]
+        except Exception as e:
+            # Unexpected error in code
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+            print(ex_str)
 
-    except Exception as e:
-        # Unexpected error in code
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
-        print(ex_str)
-
-        return jsonify({
-            "code": 500,
-            "message": "Create_Room.py internal error: " + ex_str
-        }), 500
+            return jsonify({
+                "code": 500,
+                "message": "Create_Room.py internal error: " + ex_str
+            }), 500
 
     # if reached here, not a JSON request.
     return jsonify({
@@ -58,11 +58,12 @@ def create_room():
     }), 400
 
 
-def processCreateRoom(content):
+def processCreateRoom(request_info):
     # 2. POST a request to create a room.
     print('\n-----Sending request to room.py to create room-----')
-    room_result = invoke_http(room_URL, method='POST', json=content)
+    room_result = invoke_http(room_URL, method='POST', json=request_info)
     exchange_name = 'activity_error_exchange'
+    print('create_room_result:', room_result)
 
     #for activity_log routing key
     if room_result['code'] in range(200, 300):
@@ -78,11 +79,6 @@ def processCreateRoom(content):
 
         print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
-        return {
-            "code": code,
-            "data": room_result,
-            "message": message
-        }
     #for error_log routing key
     else:
         print('\n\n-----Invoking error microservice as room creation fails-----')
@@ -96,13 +92,23 @@ def processCreateRoom(content):
             code=500
             message = "An error occurred while sending the message. " + str(e)
 
+        print(message)
         print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
-        return {
-            "code": code,
-            "data": room_result,
-            "message": message
+    print('\n\n-----Sending request to message.py to create exchange and queue-----')    
+    
+    room_result_data = room_result['data']
+    message_result = invoke_http(
+        message_URL + "/create", method="POST", json=room_result_data)
+    print("message_result:", message_result, '\n')
+
+    return {
+        "code": 201,
+        "data": {
+            "room_result": room_result,
+            "message_result": message_result
         }
+    }
 
 
 
