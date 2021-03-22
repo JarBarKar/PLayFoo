@@ -17,8 +17,7 @@ CORS(app)
 room_URL = "http://localhost:5001/room"
 # game_URL = "http://localhost:5002/game"
 #message_URL = "http://localhost:5003/"
-#message_receiver_URL = "http://localhost:5004/"
-activity_log_URL = "http://localhost:5005/activity_log"
+activity_log_URL = "http://localhost:5004/activity_log"
 
 
 #Create Room (must send via JSON REQUEST)
