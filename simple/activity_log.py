@@ -1,5 +1,6 @@
 import json
 import os
+import pika
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -34,34 +35,33 @@ class Activity_Log(db.Model):
         return {"activity_id": self.activity_id, "description": self.description, "code": self.code, "timestamp": self.timestamp}
 
 
-@app.route("/activity_log", methods=['POST'])
-def activity_log_receive():
-    amqp_setup.check_setup()
-    exchange_name = 'activity_log_exchange'
-    queue_name = 'activity_log_queue'
-    routing_key = '#'
-    #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
-    amqp_setup.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
+# @app.route("/activity_log", methods=['POST'])
+# def activity_log_receive():
+#     exchange_name = 'activity_log_exchange'
+#     queue_name = 'activity_log_queue'
+#     routing_key = '#'
+#     #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
+#     amqp_setup.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+#     amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
 
 def callback(channel, method, properties, body): # required signature for the callback; no return
-    print("\nReceived an order log by " + __file__)
+    print("\nReceived a log file by " + __file__)
     processOrderLog(json.loads(body))
     print() # print a new line feed
 
-def processOrderLog(order):
+def processOrderLog(data):
     try:
-        db.session.add(member)
+        db.session.add(data)
         db.session.commit()
         print("Recording an order log:")
-        print(order)
+        print(data)
     except:
         return jsonify(
             {
                 "code": 500,
                 "data": {
-                    "user_id": member.user_id,
-                    "room": member.room_id
+                    "user_id": data.user_id,
+                    "room": data.room_id
                     },
                 "message": "An error occurred joining the room."
             }
@@ -71,8 +71,8 @@ def processOrderLog(order):
         {
             "code": 500,
             "data": {
-                "user_id": member.user_id,
-                "room": member.room_id
+                "user_id": data.user_id,
+                "room": data.room_id
                 },
             "message": "An error occurred joining the room."
         }
@@ -126,8 +126,14 @@ def processOrderLog(order):
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
     app.run(port=5005, debug=True)
     amqp_setup.check_setup() # to make sure connection and channel are running    # set up a consumer and start to wait for coming messages
+    exchange_name = 'activity_log_exchange'
+    queue_name = 'activity_log_queue'
+    routing_key = '#'
     amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
     amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
+    amqp_setup.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+    amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
+
 
     print("\nThis is " + os.path.basename(__file__), end='')
     # print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))

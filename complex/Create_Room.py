@@ -30,34 +30,35 @@ activity_log_URL = "http://localhost:5005/activity_log"
 def create_room():
     # Simple check of input format and data of the request are JSON
 
+    try:
+        room = request.get_json()
+        print("\nReceived room details in JSON:", room)
+        # do the actual work
+        # 1. Send room info
+        result = processCreateRoom(room)
+        print('\n------------------------')
+        print('\nresult: ', result)
+        return jsonify(result), result["code"]
 
-        try:
-            room = request.get_json()
-            print("\nReceived room details in JSON:", room)
-            # do the actual work
-            # 1. Send room info
-            result = processCreateRoom(room)
-            print('\n------------------------')
-            print('\nresult: ', result)
-            return jsonify(result), result["code"]
+    except Exception as e:
+        # Unexpected error in code
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+        print(ex_str)
 
-        except Exception as e:
-            # Unexpected error in code
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
-            print(ex_str)
-
-            return jsonify({
-                "code": 500,
-                "message": "Create_Room.py internal error: " + ex_str
-            }), 500
+        return jsonify({
+            "code": 500,
+            "message": "Create_Room.py internal error: " + ex_str
+        }), 500
 
     # if reached here, not a JSON request.
-    return jsonify({
-        "code": 400,
-        "message": "Invalid JSON input: " + str(request.get_data())
-    }), 400
+    return jsonify(
+        {
+            "code": 400,
+            "message": "Invalid JSON input: " + str(request.get_data())
+        }
+    ), 400
 
 
 def processCreateRoom(room):
@@ -66,9 +67,8 @@ def processCreateRoom(room):
     room_result = invoke_http(room_URL, method='POST', json=room)
 
     # 3. Setting up amqp between publisher and subscriber for create_room and activity_log
-    print('\n-----Setting up subscriber queue for activity_log microservice-----')
-
-    room_result = invoke_http(activity_log_URL, method='POST')
+    # print('\n-----Setting up subscriber queue for activity_log microservice-----')
+    # room_result = invoke_http(activity_log_URL, method='POST')
 
     print('\n-----Setting up exchange broker to publish messages-----')
     exchange_name = 'activity_log_exchange'
@@ -80,7 +80,7 @@ def processCreateRoom(room):
 
     print('room_result:', room_result)
 
-        try:
+    try:
         amqp_setup.channel.exchange_declare(exchange_name=exchange_name, exchange_type='topic', durable=True)
         amqp_setup.channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
         code = 200
@@ -88,15 +88,15 @@ def processCreateRoom(room):
         code=500
         message = "An error occurred while sending the message. " + str(e)
 
-        return 
-        {
+    return 
+    {
         "code": 201,
         "data": 
             {
                 "room_result": room_result
             },
         "message": "Room creation successful."
-        }
+    }
   
 
     # # Check the result; if a failure, send it to the error microservice.
