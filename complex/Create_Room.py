@@ -65,6 +65,10 @@ def processCreateRoom(request_info):
     exchange_name = 'activity_error_exchange'
     print('create_room_result:', room_result)
 
+    #Setting up activity_log and error exchange
+    print('\n --Setting up exchange-- \n')
+    amqp_setup.channel.exchange_declare(exchange='activity_error_exchange', exchange_type='topic', durable=True)
+
     #for activity_log routing key
     if room_result['code'] in range(200, 300):
         print('\n\n-----Invoking activity_log microservice as room creation successful-----')
@@ -95,20 +99,20 @@ def processCreateRoom(request_info):
         print(message)
         print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
-    print('\n\n-----Sending request to message.py to create exchange and queue-----')    
+    # print('\n\n-----Sending request to message.py to create exchange and queue-----')    
     
-    room_result_data = room_result['data']
-    message_result = invoke_http(
-        message_URL + "/create", method="POST", json=room_result_data)
-    print("message_result:", message_result, '\n')
+    # room_result_data = room_result['data']
+    # message_result = invoke_http(
+    #     message_URL + "/create", method="POST", json=room_result_data)
+    # print("message_result:", message_result, '\n')
 
-    return {
-        "code": 201,
-        "data": {
-            "room_result": room_result,
-            "message_result": message_result
-        }
-    }
+    # return {
+    #     "code": 201,
+    #     "data": {
+    #         "room_result": room_result,
+    #         "message_result": message_result
+    #     }
+    # }
 
 
 
