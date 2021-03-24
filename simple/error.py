@@ -5,9 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import amqp_setup
 
-monitorBindingKey='#'
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/error'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/playfoo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -15,43 +15,58 @@ db = SQLAlchemy(app)
 CORS(app)  
 
 class Error(db.Model):
-    __tablename__ = 'error'
+    __tablename__ = 'Error'
     error_id = db.Column(db.Integer(), primary_key=True)
-    description = db.Column(db.String(128), nullable=False)
+    code = db.Column(db.Integer(), nullable=False)
+    data = db.Column(db.String(1000), nullable=False)
+    message = db.Column(db.String(128), nullable=False)
     timestamp= db.Column(db.DateTime, server_default=db.func.now())
 
     
 
-    def __init__(self, error_id, description, timestamp):
-        self.error_id = error_id
-        self.description = description
-        self.timestamp = timestamp
+    def __init__(self, code, data, message):
+        self.code = code
+        self.data = data
+        self.message = message
+
 
 
     def json(self):
-        return {"error_id": self.error_id, "description": self.description, "timestamp": self.timestamp}
+        return {"error_id": self.activity_id, "code": self.code, "data": self.data, "message": self.message, "timestamp": self.timestamp}
+
 
 
 @app.route("/error", methods=['POST'])
-def receiveErrorLog():
-    amqp_setup.check_setup()
-    queue_name = 'error'    
-    # set up a consumer and start to wait for coming messages
-    amqp_setup.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
-    #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
-
-def callback(channel, method, properties, body): # required signature for the callback; no return
-    print("\nReceived an error log by " + __file__)
-    processOrderLog(json.loads(body))
-    print() # print a new line feed
-
-def processOrderLog(error):
-    print("Recording an error log:")
-    print(error)
+def error_receive():
+    print('\n--Receiving data...--')
+    data = request.get_json()
+    data = json.loads(data)
+    print(data)
+    error = Error(code=data['code'],data=json.dumps(data['data']),message=data['message'])
+    try:
+        db.session.add(error)
+        db.session.commit()
+        print("Recording an error log:")
+        print(data)
+    except:
+        return jsonify(
+            {
+                "code": 500,
+                "data": data,
+                "message": "An error occurred creating an error log."
+            }
+        ), 500
+    return jsonify(
+        {
+            "code": 201,
+            "data": data,
+            "message": "Error successfully logged in the database."
+        }
+    ), 201
 
 
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
+    app.run(port=5006, debug=True)
     print("\nThis is " + os.path.basename(__file__), end='')
-    print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
-    receiveErrorLog()
+    # print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
+    

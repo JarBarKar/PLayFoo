@@ -11,10 +11,10 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-# user_url = "http://localhost:5000/user"
-room_url = "http://localhost:5001/room"
-# game_url = "http://localhost:5002/game"
-message_url = "http://localhost:5003/message"
+# user_URL = "http://localhost:5000/user"
+room_URL = "http://localhost:5001/room"
+# game_URL = "http://localhost:5002/game"
+message_URL = "http://localhost:5003/message"
 
 @app.route('/leave', methods=['DELETE'])
 def leave_room():
@@ -54,7 +54,7 @@ def processLeaveRoom(request_info):
     # 2. Send the room and user info
     # Invoke the room microservice
     print('\n-----Invoking room microservice-----')
-    room_result = invoke_http(room_url, method='DELETE', json=request_info)
+    room_result = invoke_http(room_URL, method='DELETE', json=request_info)
     print('leave_room_result:', room_result)
 
     # Check the order result; if a failure, send it to the error microservice.
@@ -110,7 +110,7 @@ def processLeaveRoom(request_info):
     
     room_result_data = room_result['data']
     message_result = invoke_http(
-        message_url, method="DELETE", json=room_result_data)
+        message_URL, method="DELETE", json=room_result_data)
     print("message_result:", message_result, '\n')
 
     # Check the shipping result;

@@ -5,7 +5,8 @@ Simple Microservices:
     5001: room.py
     5002: game.py
     5003: message.py
-    5004: message_receiver.py
+    5004: activity_log.py
+    5005: error_log.py
 
 Complex Microservices:
     5100: Create_Room.py

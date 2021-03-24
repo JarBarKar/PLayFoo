@@ -16,9 +16,8 @@ CORS(app)
 #user_URL = "http://localhost:5000/user"
 room_URL = "http://localhost:5001/room"
 # game_URL = "http://localhost:5002/game"
-#message_URL = "http://localhost:5003/"
-#message_receiver_URL = "http://localhost:5004/"
-activity_log_URL = "http://localhost:5005/activity_log"
+message_URL = "http://localhost:5003/message"
+activity_log_URL = "http://localhost:5004/activity_log"
 
 
 #Create Room (must send via JSON REQUEST)
@@ -29,6 +28,7 @@ activity_log_URL = "http://localhost:5005/activity_log"
 @app.route("/create_room", methods=['POST'])
 def create_room():
     # Simple check of input format and data of the request are JSON
+<<<<<<< HEAD
 
     try:
         room = request.get_json()
@@ -51,6 +51,30 @@ def create_room():
             "code": 500,
             "message": "Create_Room.py internal error: " + ex_str
         }), 500
+=======
+    if request.is_json:
+        try:
+            request_info = request.get_json()
+            print("\nReceived room details in JSON:", request_info)
+            # do the actual work
+            # 1. Send room info
+            result = processCreateRoom(request_info)
+            print('\n------------------------')
+            print('\nresult: ', result)
+            return jsonify(result), result["code"]
+
+        except Exception as e:
+            # Unexpected error in code
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
+            print(ex_str)
+
+            return jsonify({
+                "code": 500,
+                "message": "Create_Room.py internal error: " + ex_str
+            }), 500
+>>>>>>> e8c4afa776dab7c3fc60d42e1b73bf45a5c582d5
 
     # if reached here, not a JSON request.
     return jsonify(
@@ -61,6 +85,7 @@ def create_room():
     ), 400
 
 
+<<<<<<< HEAD
 def processCreateRoom(room):
     # 2. Setting up amqp between publisher and subscriber for create_room and activity_log
     print('\n-----Sending request to room.py to create room-----')
@@ -140,11 +165,53 @@ def processCreateRoom(room):
     #     # invoke_http(activity_log_URL, method="POST", json=order_result)            
     #     amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="room.info", 
     #         body=message)
-    
-    # print("\nOrder published to RabbitMQ Exchange.\n")
-    # # - reply from the invocation is not used;
-    # # continue even if this invocation fails
+=======
+def processCreateRoom(request_info):
+    # 2. POST a request to create a room.
+    print('\n-----Sending request to room.py to create room-----')
+    room_result = invoke_http(room_URL, method='POST', json=request_info)
+    exchange_name = 'activity_error_exchange'
+    print('create_room_result:', room_result)
 
+    #for activity_log routing key
+    if room_result['code'] in range(200, 300):
+        print('\n\n-----Invoking activity_log microservice as room creation successful-----')
+        routing_key = 'info'
+        code = 201
+        message = 'Room creation successful'
+        try:
+            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+        except Exception as e:
+            code=500
+            message = "An error occurred while sending the message. " + str(e)
+
+        print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
+
+    #for error_log routing key
+    else:
+        print('\n\n-----Invoking error microservice as room creation fails-----')
+        routing_key = 'error'
+        code = 500
+        message = 'Room creation failed'
+        try:
+            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+            code = 500
+        except Exception as e:
+            code=500
+            message = "An error occurred while sending the message. " + str(e)
+
+        print(message)
+        print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
+
+    print('\n\n-----Sending request to message.py to create exchange and queue-----')    
+>>>>>>> e8c4afa776dab7c3fc60d42e1b73bf45a5c582d5
+    
+    room_result_data = room_result['data']
+    message_result = invoke_http(
+        message_URL + "/create", method="POST", json=room_result_data)
+    print("message_result:", message_result, '\n')
+
+<<<<<<< HEAD
     # # 7. Return error
     #     return {
     #         "code": 400201,
@@ -153,6 +220,15 @@ def processCreateRoom(room):
     #         },
     #         "message": "Room creation successful."
     #     }
+=======
+    return {
+        "code": 201,
+        "data": {
+            "room_result": room_result,
+            "message_result": message_result
+        }
+    }
+>>>>>>> e8c4afa776dab7c3fc60d42e1b73bf45a5c582d5
 
 
 
@@ -160,7 +236,13 @@ def processCreateRoom(room):
 if __name__ == "__main__":
     print("This is flask " + os.path.basename(__file__) + " for creating a room...")
     app.run(port=5100, debug=True)
+<<<<<<< HEAD
     amqp_setup.check_setup()    # Notes for the parameters: 
+=======
+    amqp_setup.check_setup() # to make sure connection and channel are running
+
+    # Notes for the parameters: 
+>>>>>>> e8c4afa776dab7c3fc60d42e1b73bf45a5c582d5
     # - debug=True will reload the program automatically if a change is detected;
     #   -- it in fact starts two instances of the same flask program, and uses one of the instances to monitor the program changes;
     # - host="0.0.0.0" allows the flask program to accept requests sent from any IP/host (in addition to localhost),
