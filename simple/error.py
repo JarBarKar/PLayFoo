@@ -1,72 +1,68 @@
 import json
 import os
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
+
 import amqp_setup
+from sqlalchemy import Table, Column, Integer, String, DateTime, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
+import datetime as dt
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/playfoo'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+Base = declarative_base()
 
-db = SQLAlchemy(app)
+engine = create_engine('mysql+mysqlconnector://root@localhost:3306/playfoo')
 
-CORS(app)  
+Session = sessionmaker(bind=engine)
+session = Session()
 
-class Error(db.Model):
+class Error(Base):
     __tablename__ = 'Error'
-    error_id = db.Column(db.Integer(), primary_key=True)
-    code = db.Column(db.Integer(), nullable=False)
-    data = db.Column(db.String(1000), nullable=False)
-    message = db.Column(db.String(128), nullable=False)
-    timestamp= db.Column(db.DateTime, server_default=db.func.now())
-
-    
+    error_id = Column(Integer(), primary_key=True)
+    code = Column(Integer(), nullable=False)
+    data = Column(String(1000), nullable=False)
+    message = Column(String(128), nullable=False)
+    timestamp= Column(DateTime, default=dt.datetime.now())
 
     def __init__(self, code, data, message):
         self.code = code
         self.data = data
         self.message = message
 
-
-
     def json(self):
-        return {"error_id": self.activity_id, "code": self.code, "data": self.data, "message": self.message, "timestamp": self.timestamp}
+        return {"activity_id": self.activity_id, "code": self.code, "data": self.data, "message": self.message, "timestamp": self.timestamp}
 
 
 
-@app.route("/error", methods=['POST'])
-def error_receive():
-    print('\n--Receiving data...--')
-    data = request.get_json()
-    data = json.loads(data)
-    print(data)
-    error = Error(code=data['code'],data=json.dumps(data['data']),message=data['message'])
-    try:
-        db.session.add(error)
-        db.session.commit()
-        print("Recording an error log:")
-        print(data)
-    except:
-        return jsonify(
-            {
-                "code": 500,
-                "data": data,
-                "message": "An error occurred creating an error log."
-            }
-        ), 500
-    return jsonify(
-        {
-            "code": 201,
-            "data": data,
-            "message": "Error successfully logged in the database."
-        }
-    ), 201
+def callback(channel, method, properties, body): # required signature for the callback; no return
+    print("\nReceived a log by " + __file__)
+    processErrorLog(body)
+    print() # print a new line feed
+
+def processErrorLog(data):
+    print(json.loads(data)['code'])
+    data = json.loads(data.decode('UTF-8'))
+    #check if send to activity or error depending on code
+    log = Error(code=data['code'],data=json.dumps(data['data']),message=data['message'])
 
 
-if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
-    app.run(port=5006, debug=True)
-    print("\nThis is " + os.path.basename(__file__), end='')
-    # print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
+    session.add(log)
+    session.commit()
+    print("Recording an error log:")
+    print(log)
+
+
+#Setting up error queue
+print('--Setting up error queue-- \n')
+amqp_setup.channel.queue_declare(queue='error_queue', durable=True)
+amqp_setup.channel.queue_bind(exchange='activity_error_exchange', queue='error_queue', routing_key='error')
+
+print('--Initiate error worker-- \n')
+amqp_setup.channel.basic_consume(queue='error_queue', on_message_callback=callback, auto_ack=True)
+
+print('\n--Start listening for messages....-- \n')
+amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
+
+
+
+
     

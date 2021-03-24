@@ -1,35 +1,31 @@
 import json
 import os
-import pika
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
 import amqp_setup
+from sqlalchemy import Table, Column, Integer, String, DateTime, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-monitorBindingKey='#'
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/activity_log'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+import datetime as dt
 
-db = SQLAlchemy(app)
+Base = declarative_base()
 
-CORS(app)  
+engine = create_engine('mysql+mysqlconnector://root@localhost:3306/playfoo')
 
-class Activity_Log(db.Model):
+Session = sessionmaker(bind=engine)
+session = Session()
+
+class Activity_Log(Base):
     __tablename__ = 'activity_log'
-    activity_id = db.Column(db.Integer(), primary_key=True)
-    description = db.Column(db.String(128), nullable=False)
-    code = db.Column(db.Integer(), nullable=False)
-    timestamp= db.Column(db.DateTime, server_default=db.func.now())
+    activity_id = Column(Integer(), primary_key=True)
+    code = Column(Integer(), nullable=False)
+    data = Column(String(1000), nullable=False)
+    message = Column(String(128), nullable=False)
+    timestamp= Column(DateTime, default=dt.datetime.now())
 
-    
-
-    def __init__(self, activity_id, description, code, timestamp):
-        self.activity_id = activity_id
-        self.description = description
+    def __init__(self, code, data, message):
         self.code = code
-        self.timestamp = timestamp
-
+        self.data = data
+        self.message = message
 
     def json(self):
         return {"activity_id": self.activity_id, "description": self.description, "code": self.code, "timestamp": self.timestamp}
@@ -49,92 +45,36 @@ def callback(channel, method, properties, body): # required signature for the ca
     processOrderLog(json.loads(body))
     print() # print a new line feed
 
+
+
+def callback(channel, method, properties, body): # required signature for the callback; no return
+    print("\nReceived a log by " + __file__)
+    processOrderLog(body)
+    print() # print a new line feed
+
 def processOrderLog(data):
-    try:
-        db.session.add(data)
-        db.session.commit()
-        print("Recording an order log:")
-        print(data)
-    except:
-        return jsonify(
-            {
-                "code": 500,
-                "data": {
-                    "user_id": data.user_id,
-                    "room": data.room_id
-                    },
-                "message": "An error occurred joining the room."
-            }
-        ), 500
-        
-    return jsonify(
-        {
-            "code": 500,
-            "data": {
-                "user_id": data.user_id,
-                "room": data.room_id
-                },
-            "message": "An error occurred joining the room."
-        }
-    ), 500
+    print(json.loads(data)['code'])
+    data = json.loads(data.decode('UTF-8'))
+    #check if send to activity or error depending on code
+    log = Activity_Log(code=data['code'],data=json.dumps(data['data']),message=data['message'])
 
-# def activity_log_receive():
-#     exchange_name= "activity_log_exchange"
-#     queue_name = "activity_log_queue"
-#     try:
-#         amqp_setup.create_queue(exchange_name, queue_name)
-#         code = 200
-#         message = "Queue successfully created."
-#         t = Thread(target=amqp_setup.receive_messages, args=(queue_name, callback))
-#         t.start()
-#     except Exception as e:
-#         code = 500
-#         message = "An error occurred while creating the queue. " + str(e)
-
-#     return jsonify(
-#         {
-#             "code": code,
-#             "data": {
-#                 "exchange_name": exchange_name,
-#                 "queue_name": queue_name
-#             },
-#             "message": message
-#         }
-#     ), code
-
-# # defines what to do when receiving message
-# def callback(channel, method, properties, body): # required signature for the callback; no return
-#     print("\nReceived a message from " + __file__)
-#     processMessage(body)
-#     print() # print a new line feed
-
-# # defines how exactly to process received message
-# def processMessage(body):
-#     print("Printing the message:")
-#     try:
-#         #Store in DB first, then convert to JSON string and print it out
-#         activity_log = Activity_Log(body)
-#         db.session.add(activity_log)
-#         db.session.commit()
-#         message_body = json.loads(body)
-#         print("--JSON:", message_body)
-#     except Exception as e:
-#         print("--NOT JSON:", e)
-#         print("--DATA:", body)
-#     print()
-
-if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
-    app.run(port=5005, debug=True)
-    amqp_setup.check_setup() # to make sure connection and channel are running    # set up a consumer and start to wait for coming messages
-    exchange_name = 'activity_log_exchange'
-    queue_name = 'activity_log_queue'
-    routing_key = '#'
-    amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
-    amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
-    amqp_setup.channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
+    session.add(log)
+    session.commit()
+    print("Recording an activity log:")
+    print(log)
 
 
-    print("\nThis is " + os.path.basename(__file__), end='')
-    # print(": monitoring routing key '{}' in exchange '{}' ...".format(monitorBindingKey, amqp_setup.exchangename))
+
+print('--Setting up activity_log queue-- \n')
+amqp_setup.channel.queue_declare(queue='activity_log_queue', durable=True)
+amqp_setup.channel.queue_bind(exchange='activity_error_exchange', queue='activity_log_queue', routing_key='info')
+
+print('--Initiate activity_log worker-- \n')
+amqp_setup.channel.basic_consume(queue='activity_log_queue', on_message_callback=callback, auto_ack=True)
+
+
+print('\n--Start listening for messages....-- \n')
+amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
+
+
     
