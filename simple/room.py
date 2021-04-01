@@ -105,14 +105,14 @@ def join_room(room_id):
     if no_of_members==selected_room.capacity:
         return jsonify(
             {
-                "code" : 500,
+                "code" : 401,
                 "data": {
                     "user_id": member.user_id,
                     "room_id": member.room_id
                 },
                 "message" : "Room is full."
             }
-        )
+        ), 401
     #Get user id via request
     else:
         data = request.get_json()

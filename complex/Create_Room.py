@@ -99,20 +99,6 @@ def processCreateRoom(request_info):
         print(message)
         print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
-    # print('\n\n-----Sending request to message.py to create exchange and queue-----')    
-    
-    # room_result_data = room_result['data']
-    # message_result = invoke_http(
-    #     message_URL + "/create", method="POST", json=room_result_data)
-    # print("message_result:", message_result, '\n')
-
-    # return {
-    #     "code": 201,
-    #     "data": {
-    #         "room_result": room_result,
-    #         "message_result": message_result
-    #     }
-    # }
 
 
 
