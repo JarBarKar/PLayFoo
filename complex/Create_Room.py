@@ -181,6 +181,7 @@ def processCreateRoom(request_info):
         print(message)
         print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
+<<<<<<< HEAD
 
     
     room_result_data = room_result['data']
@@ -211,6 +212,8 @@ def processCreateRoom(request_info):
     #         "message_result": message_result
     #     }
     # }
+=======
+>>>>>>> 85c0376d21e464ea7b38243d3fe68c6ff056d65a
 
 
 
