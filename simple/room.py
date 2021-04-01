@@ -54,7 +54,7 @@ def get_room(game_id):
                 "code": 200,
                 "data": [room.json() for room in roomlist]
             }
-        )
+        ), 200
     return jsonify(
         {
             "code": 404,
@@ -106,6 +106,10 @@ def join_room(room_id):
         return jsonify(
             {
                 "code" : 500,
+                "data": {
+                    "user_id": member.user_id,
+                    "room_id": member.room_id
+                },
                 "message" : "Room is full."
             }
         )
@@ -138,7 +142,8 @@ def join_room(room_id):
             "data": {
                 "user_id": member.user_id,
                 "room_id": member.room_id
-            }
+            },
+            "message":"Successfully joined room."
         }
     ), 201
 
