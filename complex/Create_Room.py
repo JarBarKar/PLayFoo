@@ -60,7 +60,6 @@ def create_room():
     ), 400
 
 
-<<<<<<< HEAD
 def processCreateRoom(room):
     # 2. Setting up amqp between publisher and subscriber for create_room and activity_log
     print('\n-----Sending request to room.py to create room-----')

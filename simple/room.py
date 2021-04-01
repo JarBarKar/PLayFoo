@@ -113,7 +113,6 @@ def join_room(room_id):
     else:
         data = request.get_json()
         member = Member(**data)
-
     try:
         db.session.add(member)
         db.session.commit()
