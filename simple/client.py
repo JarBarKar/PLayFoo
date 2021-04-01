@@ -49,6 +49,5 @@ while stop != 'y':
     stop = input('stop [y/n]')
 
 amqp_setup.channel.basic_cancel(consumer_tag)
-
 # think of a way to stop this
 
