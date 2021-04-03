@@ -120,16 +120,21 @@ def processMessage(body):
     print()
 
 # function to publish a sent message to the exchange of the room chat
-@app.route('/message/send/<int:room_id>&<string:user_id>', methods=['POST'])
-def publish_message(room_id, user_id):
-    # NOTE: currently we are treating queue_name as the routing key (see amqp_setup), might want to modify later
+@app.route('/message/send', methods=['POST'])
+def publish_message():
+
+    request_info = request.get_json()
+    
+    user_id = request_info['user_id']
+    room_id = request_info['room_id']
+    content = request_info['content']
+    
     exchange_name = str(room_id) + "_roomchat"
     routing_key = str(room_id) + ".*"
-    content = json.dumps(request.get_json())
     try:
         amqp_setup.channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
         code = 200
-        message = "Message successfully sent."
+        message = "Message sent."
     except Exception as e:
         code = 500
         message = "An error occurred while sending the message. " + str(e)

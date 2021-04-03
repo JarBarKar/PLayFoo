@@ -1,7 +1,0 @@
-amqp_setup.py:
-    1. defines channel, connection, exchange and queue properties
-    2. create_exchange function
-    3. create_queue function
-    4. send_message
-    5. receive_messages
-    6. check_setup gets channel, connection running
