@@ -13,19 +13,19 @@ class User(db.Model):
     """
     creates User table with the following attributes:
     user_id: varchar(12), primary key
-    name: varchar(16)
+    password: varchar(16)
     """
     __tablename__ = 'user'
 
     user_id = db.Column(db.String(12), primary_key=True)
-    name = db.Column(db.String(16), nullable=False)
+    password = db.Column(db.String(16), nullable=False)
 
-    def __init__(self, user_id, name):
+    def __init__(self, user_id, password):
         self.user_id = user_id
-        self.name = name
+        self.password = password
 
     def json(self):
-        return {"user_id":self.user_id, "name":self.name}
+        return {"user_id":self.user_id, "password":self.password}
 
 @app.route("/user/<string:user_id>")
 def find_by_user_id(user_id):
@@ -43,7 +43,7 @@ def find_by_user_id(user_id):
     return jsonify(
         {
             "code": 404,
-            "message": "Book not found."
+            "message": "User not found."
         }
     ), 404
 

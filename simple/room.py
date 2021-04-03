@@ -33,26 +33,33 @@ class Member(db.Model):
     __tablename__ = 'member'
     user_id = db.Column(db.String(100), primary_key=True)
     room_id = db.Column(db.Integer(), primary_key=True)
+    room_name = db.Column(db.String(64), nullable=False)
 
 
-    def __init__(self, user_id, room_id):
+    def __init__(self, user_id, room_id, room_name):
         self.user_id = user_id
         self.room_id = room_id
+        self.room_name = room_name
 
 
     def json(self):
-        return {"user_id": self.user_id, "room_id": self.room_id}
+        return {"user_id": self.user_id, "room_id": self.room_id, "room_name":self.room_name}
 
 
 #Get room based on game_id
 @app.route("/room/<string:game_id>")
 def get_room(game_id):
     roomlist = Room.query.filter_by(game_id=game_id)
+    rooms = [room.json() for room in roomlist]
+    room_name_list = [room['room_name'] for room in rooms]
     if roomlist:
         return jsonify(
             {
                 "code": 200,
-                "data": [room.json() for room in roomlist]
+                "data": {
+                    'rooms': rooms,
+                    'capacity': [Member.query.filter_by(room_name=single_room_name).count() for single_room_name in room_name_list]
+                }
             }
         ), 200
     return jsonify(
@@ -68,11 +75,10 @@ def get_room(game_id):
 @app.route("/room", methods=['POST'])
 def create_room():
     data = request.get_json()
-
     try:
         print(f'\n\n---Creating Room: {data["room_name"]}...---')
         room = Room(room_name=data['room_name'],game_id=data['game_id'],capacity=data['capacity'],host_id=data['host_id'])
-        member = Member(room.host_id,room.room_id)
+        member = Member(room.host_id,room.room_id,room.room_name)
         db.session.add(room)
         db.session.add(member)
         db.session.commit()
