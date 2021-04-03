@@ -9,7 +9,7 @@ import pika
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/message'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/playfoo'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -28,15 +28,15 @@ class Message(db.Model):
     room_id = db.Column(db.Integer(), nullable=False)
     user_id = db.Column(db.String(12), nullable=False)
     content = db.Column(db.String(150), nullable=False)
+    timestamp= db.Column(DateTime, default=dt.datetime.now())
 
-    def __init__(self, message_id, room_id, user_id, content):
-        self.message_id = message_id
+    def __init__(self, room_id, user_id, content):
         self.room_id = room_id
         self.user_id = user_id
         self.content = content
 
     def json(self):
-        return {"message_id":self.message_id, "room_id":self.room_id, "user_id":self.user_id, "content":self.content}
+        return {"message_id":self.message_id, "room_id":self.room_id, "user_id":self.user_id, "content":self.content, "timestamp":self.timestamp}
 
 # function to create an exchange for a specific room's chat whenever a room is created
 @app.route('/message/create', methods=['POST'])
@@ -44,6 +44,7 @@ def create_room_chat():
     request_info = request.get_json()
     room_id = request_info['room_id']
     host_id = request_info['room_info']['host_id']
+
 
     exchange_name= str(room_id) + "_roomchat"
     exchange_type= "fanout"
@@ -88,6 +89,7 @@ def join_room_chat():
 
     except Exception as e:
         code = 500
+
         message = "An error occurred while creating the queue. " + str(e)
 
     return jsonify(
@@ -122,17 +124,14 @@ def processMessage(body):
 # function to publish a sent message to the exchange of the room chat
 @app.route('/message/send', methods=['POST'])
 def publish_message():
-
     request_info = request.get_json()
-    
     user_id = request_info['user_id']
     room_id = request_info['room_id']
     content = request_info['content']
-    
     exchange_name = str(room_id) + "_roomchat"
     routing_key = str(room_id) + ".*"
     try:
-        amqp_setup.channel.basic_publish(exchange=exchange_name, body=content, properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+        amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(request_info), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
         code = 200
         message = "Message sent."
     except Exception as e:

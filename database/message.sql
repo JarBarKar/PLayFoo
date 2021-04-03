@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS `message` (
   `room_id` int(6) NOT NULL,
   `user_id` varchar(12) NOT NULL,
   `content` varchar(150) NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`message_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -43,9 +44,13 @@ CREATE TABLE IF NOT EXISTS `message` (
 -- Dumping data for table `message`
 --
 
-INSERT INTO `message` (`message_id`, `room_id`, `user_id`, `content`) VALUES
-(1, 1, 'edwinlzs', 'first message everrrrr'),
-(2, 2, 'weeb', 'second message everrrrr');
+INSERT INTO `message` (`message_id`, `room_id`, `user_id`, `content`, `timestamp`) VALUES
+(1,1, 'edwinlzs', 'first message everrrrr',CURRENT_TIMESTAMP()),
+(2,2, 'weeasdb', 'second message everrrrr',CURRENT_TIMESTAMP()),
+(3,2, 'weeewrgb', 'muda',CURRENT_TIMESTAMP()),
+(4,2, 'weejb', 'zawado',CURRENT_TIMESTAMP()),
+(5,2, 'weebng', 'mistaaaa',CURRENT_TIMESTAMP()),
+(6,2, 'weaeb', 'booby',CURRENT_TIMESTAMP());
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

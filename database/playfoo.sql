@@ -126,13 +126,12 @@ CREATE TABLE IF NOT EXISTS `error` (
 --
 
 INSERT INTO `error` (`error_id`, `code`, `data`,`message`, `timestamp`) VALUES
-(1, 200 ,'123123','Joined a Room',  CURRENT_TIMESTAMP()),
+(1, 200 ,'123123','Naruto Room',  CURRENT_TIMESTAMP()),
 (2, 502, 'testgay', 'Failed room joining. Damn!', CURRENT_TIMESTAMP());
 COMMIT;
 
 -- --------------------------------------------------------
 
---
 -- Table structure for table `message`
 --
 
@@ -142,6 +141,7 @@ CREATE TABLE IF NOT EXISTS `message` (
   `room_id` int(6) NOT NULL,
   `user_id` varchar(12) NOT NULL,
   `content` varchar(150) NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`message_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -149,32 +149,25 @@ CREATE TABLE IF NOT EXISTS `message` (
 -- Dumping data for table `message`
 --
 
-INSERT INTO `message` (`message_id`, `room_id`, `user_id`, `content`) VALUES
-(1, 1, 'edwinlzs', 'first message everrrrr'),
-(2, 2, 'weeb', 'second message everrrrr');
+INSERT INTO `message` (`message_id`, `room_id`, `user_id`, `content`, `timestamp`) VALUES
+(1,1, 'edwinlzs', 'first message everrrrr',CURRENT_TIMESTAMP()),
+(2,2, 'weeasdb', 'second message everrrrr',CURRENT_TIMESTAMP()),
+(3,2, 'weeewrgb', 'muda',CURRENT_TIMESTAMP()),
+(4,2, 'weejb', 'zawado',CURRENT_TIMESTAMP()),
+(5,2, 'weebng', 'mistaaaa',CURRENT_TIMESTAMP()),
+(6,2, 'weaeb', 'booby',CURRENT_TIMESTAMP());
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
---
--- Database: `user`
---
-CREATE DATABASE IF NOT EXISTS `user` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `user`;
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `user`
 --
 
+
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
   `user_id` varchar(12) NOT NULL,
   `password` varchar(16) NOT NULL,
-  `token` varchar(100) NOT NULL
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -182,12 +175,9 @@ CREATE TABLE IF NOT EXISTS `user` (
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`user_id`, `password`, `token`) VALUES
-('edwinlzs', 'Edwin','edwinlzsEdwin'),
-('weeb', 'Onii-San','weebOnii-San'),
-('test', 'Tester','testTester');
+INSERT INTO `user` (`user_id`, `password`) VALUES
+('edwinlzs', 'Edwin'),
+('weeb', 'Onii-San'),
+('test', 'Tester');
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
