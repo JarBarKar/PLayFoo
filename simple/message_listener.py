@@ -9,7 +9,7 @@ import datetime as dt
 
 Base = declarative_base()
 
-engine = create_engine('mysql+mysqlconnector://root@localhost:3306/playfoo')
+engine = create_engine('mysql+mysqlconnector://root@localhost:3306/message')
 
 Session = sessionmaker(bind=engine)
 session = Session()
