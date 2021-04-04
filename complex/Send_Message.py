@@ -82,6 +82,5 @@ def publish_message():
 
 
 if __name__ == "__main__":
-    print("This is flask " + os.path.basename(__file__) + " for sending a message...")
     app.run(host='0.0.0.0', port=5103, debug=True)
     amqp_setup.check_setup() # to make sure connection and channel are running
