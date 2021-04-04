@@ -11,7 +11,7 @@ import datetime as dt
 Base = declarative_base()
 
 # engine = create_engine('mysql+mysqlconnector://root@localhost:3306/activity_log')
-engine = create_engine(environ.get('dbURL'))
+engine = create_engine(environ.get('dbURL') or 'mysql+mysqlconnector://root@localhost:3306/activity_log')
 
 Session = sessionmaker(bind=engine)
 session = Session()
