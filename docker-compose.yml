@@ -58,7 +58,7 @@ services:
       rabbit_host: rabbitmq
       rabbit_port: 5672
       PYTHONUNBUFFERED: 1
-      dbURL: mysql+mysqlconnector://root@localhost:3306/activity_log
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/activity_log
 
   ###################################
   # Error: The Error simple microservice
@@ -75,7 +75,7 @@ services:
       rabbit_host: rabbitmq
       rabbit_port: 5672
       PYTHONUNBUFFERED: 1
-      dbURL: mysql+mysqlconnector://root@localhost:3306/error
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/error
   
   ##################################
   # Message: The Message simple microservice
@@ -104,13 +104,66 @@ services:
       PYTHONUNBUFFERED: 1
 
   ###############################################
-  # Create Room: The Create Room microservice
+  # Create Room: The Create Room complex microservice
   ###############################################
   Create_Room:
     build:
       context: ./complex
       dockerfile: Create_Room.Dockerfile
-    image: aarontanyien/Create_Room:1.0
+    image: aarontanyien/create_room:1.0
+    restart: always
+    depends_on:
+      - room
+      - game
+      - activity_log
+      - error
+      - message
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      user_URL: http://user:5000/user
+      room_URL: http://room:5001/room
+      game_URL: http://game:5002/game
+      activity_log_URL: 
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5100:5100"
+
+  ###############################################
+  # Join Room: The Join Room complex microservice
+  ###############################################
+  Join_Room:
+    build:
+      context: ./complex
+      dockerfile: Join_Room.Dockerfile
+    image: aarontanyien/join_room:1.0
+    restart: always
+    depends_on:
+      - room
+      - game
+      - activity_log
+      - error
+      - message
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      user_URL: http://user:5000/user
+      room_URL: http://room:5001/room
+      game_URL: http://game:5002/game
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5101:5101"
+
+  ###############################################
+  # Leave Room: The Leave Room complex microservice
+  ###############################################
+  Leave_Room:
+    build:
+      context: ./complex
+      dockerfile: Leave_Room.Dockerfile
+    image: aarontanyien/leave_room:1.0
     restart: always
     depends_on:
       - room
@@ -121,57 +174,32 @@ services:
     environment:
       rabbit_host: rabbitmq
       rabbit_port: 5672
-      room_URL: http://order:5001/order
-      order_URL: http://order:5001/order
-      shipping_record_URL: http://shipping_record:5002/shipping_record 
+      user_URL: http://user:5000/user
+      room_URL: http://room:5001/room
       PYTHONUNBUFFERED: 1
     ports:
-      - "5100:5100"
+      - "5102:5102"
 
-#   ###############################################
-#   # Join Room: The Join Room microservice
-#   ###############################################
-#   Join_Room:
-#     build:
-#       context: ./complex
-#       dockerfile: Join_Room.Dockerfile
-#     image: aarontanyien/Join_Room:1.0
-#     restart: always
-#     depends_on:
-#       - room
-#       - activity_log
-#       - error
-#       - message
-#       - rabbitmq
-#     environment:
-#       rabbit_host: rabbitmq
-#       rabbit_port: 5672
-#       order_URL: http://order:5001/order
-#       shipping_record_URL: http://shipping_record:5002/shipping_record 
-#       PYTHONUNBUFFERED: 1
-#     ports:
-#       - "5100:5100"
-
-#   ###############################################
-#   # Leave Room: The Leave Room microservice
-#   ###############################################
-#   Create_Room:
-#     build:
-#       context: ./complex
-#       dockerfile: Leave_Room.Dockerfile
-#     image: aarontanyien/Leave_Room:1.0
-#     restart: always
-#     depends_on:
-#       - room
-#       - activity_log
-#       - error
-#       - message
-#       - rabbitmq
-#     environment:
-#       rabbit_host: rabbitmq
-#       rabbit_port: 5672
-#       order_URL: http://order:5001/order
-#       shipping_record_URL: http://shipping_record:5002/shipping_record 
-#       PYTHONUNBUFFERED: 1
-#     ports:
-#       - "5100:5100"
+  ###############################################
+  # Send Message: The Send Message complex microservice
+  ###############################################
+  Send_Message:
+    build:
+      context: ./complex
+      dockerfile: Send_Message.Dockerfile
+    image: aarontanyien/send_message:1.0
+    restart: always
+    depends_on:
+      - room
+      - activity_log
+      - error
+      - message
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      user_URL: http://user:5000/user
+      room_URL: http://room:5001/room 
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5103:5103"

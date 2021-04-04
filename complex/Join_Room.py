@@ -4,17 +4,16 @@ from flask_cors import CORS
 import os, sys
 import requests
 from invokes import invoke_http
-import pika
 
+import amqp_setup
+import pika
 import json
+from os import environ
 
 app = Flask(__name__)
 CORS(app)
 
-# user_URL = "http://localhost:5000/user"
-room_URL = "http://localhost:5001/room"
-# game_URL = "http://localhost:5002/game"
-message_URL = "http://localhost:5003/message"
+room_URL = environ.get('room_URL')
 
 @app.route('/join', methods=['POST'])
 def join_room():
@@ -58,10 +57,6 @@ def processJoinRoom(request_info):
     room_result = invoke_http(room_URL + '/' + str(room_id), method='POST', json=request_info)
     print('join_room_result:', room_result)
 
-    #Setting up activity_log and error exchange
-    print('\n --Setting up exchange-- \n')
-    amqp_setup.channel.exchange_declare(exchange='activity_error_exchange', exchange_type='topic', durable=True)
-
     #for activity_log routing key
     if room_result['code'] in range(200, 300):
         print('\n\n-----Invoking activity_log microservice as successfully joined room-----')
@@ -92,22 +87,15 @@ def processJoinRoom(request_info):
         print(message)
         print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
-
-
-    print('\n\n-----Invoking message microservice-----')    
-    
-    room_result_data = room_result['data']
-    message_result = invoke_http(
-        message_URL + "/join", method="POST", json=room_result_data)
-    print("message_result:", message_result, '\n')
-
     return {
-        "code": 201,
+        "code": code,
         "data": {
-            "room_result": room_result,
-            "message_result": message_result
-        }
+            "room_result": room_result
+        },
+        "message": message
     }
 
 if __name__ == "__main__":
-    app.run(port=5101, debug=True)
+    print("This is flask " + os.path.basename(__file__) + " for joining a room...")
+    app.run(host='0.0.0.0', port=5101, debug=True)
+    amqp_setup.check_setup()

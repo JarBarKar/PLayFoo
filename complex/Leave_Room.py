@@ -4,17 +4,16 @@ from flask_cors import CORS
 import os, sys
 import requests
 from invokes import invoke_http
-import pika
 
+import amqp_setup
+import pika
 import json
+from os import environ
 
 app = Flask(__name__)
 CORS(app)
 
-# user_URL = "http://localhost:5000/user"
-room_URL = "http://localhost:5001/room"
-# game_URL = "http://localhost:5002/game"
-message_URL = "http://localhost:5003/message"
+room_URL = environ.get('room_URL')
 
 @app.route('/leave', methods=['DELETE'])
 def leave_room():
@@ -51,102 +50,50 @@ def leave_room():
     }), 400
 
 def processLeaveRoom(request_info):
-    # 2. Send the room and user info
     # Invoke the room microservice
     print('\n-----Invoking room microservice-----')
     room_result = invoke_http(room_URL, method='DELETE', json=request_info)
+    exchange_name = 'activity_error_exchange'
     print('leave_room_result:', room_result)
 
-    # Check the order result; if a failure, send it to the error microservice.
-    # code = room_result["code"]
-    # message = json.dumps(room_result)
+    #for activity_log routing key
+    if room_result['code'] in range(200, 300):
+        print('\n\n-----Invoking activity_log microservice for successfully leaving room-----')
+        routing_key = 'info'
+        code = 201
+        message = 'Leave Room successful'
+        try:
+            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+        except Exception as e:
+            code=500
+            message = "An error occurred while sending the message. " + str(e)
 
-    # if code not in range(200, 300):
-    #     # Inform the error microservice
-    #     #print('\n\n-----Invoking error microservice as order fails-----')
-    #     # print('\n\n-----Publishing the (room error) message with routing_key=room.error-----')
+        print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
-    #     # invoke_http(error_URL, method="POST", json=order_result)
-    #     # amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="room.error", 
-    #     #     body=message, properties=pika.BasicProperties(delivery_mode = 2)) 
-    #     # make message persistent within the matching queues until it is received by some receiver 
-    #     # (the matching queues have to exist and be durable and bound to the exchange)
+    else:
+        print('\n\n-----Invoking error microservice as room creation fails-----')
+        routing_key = 'error'
+        code = 500
+        message = 'Leave Room failed'
+        try:
+            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+            code = 500
+        except Exception as e:
+            code=500
+            message = "An error occurred while sending the message. " + str(e)
 
-    #     # - reply from the invocation is not used;
-    #     # continue even if this invocation fails        
-    #     print("\Room status ({:d}) published to the RabbitMQ Exchange:".format(
-    #         code), room_result)
+        print(message)
+        print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
-    #     # 7. Return error
-    #     return {
-    #         "code": 500,
-    #         "data": {"room_result": room_result},
-    #         "message": "Order creation failure sent for error handling."
-    #     }
-
-    # Notice that we are publishing to "Activity Log" only when there is no error in order creation.
-    # In http version, we first invoked "Activity Log" and then checked for error.
-    # Since the "Activity Log" binds to the queue using '#' => any routing_key would be matched 
-    # and a message sent to “Error” queue can be received by “Activity Log” too.
-
-    # else:
-    #     # 4. Record new order
-    #     # record the activity log anyway
-    #     # print('\n\n-----Invoking activity_log microservice-----')
-    #     print('\n\n-----Publishing the (room info) message with routing_key=room.info-----')        
-
-    #     # invoke_http(activity_log_URL, method="POST", json=room_result)            
-    #     amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="room.info", 
-    #         body=message)
-    
-    # print("\nRoom status published to RabbitMQ Exchange.\n")
-    # - reply from the invocation is not used;
-    # continue even if this invocation fails
-    
-    # 5. Send new room chat info to message
-    # Invoke the message microservice
-
-    print('\n\n-----Invoking message microservice-----')    
-    
-    room_result_data = room_result['data']
-    message_result = invoke_http(
-        message_URL, method="DELETE", json=room_result_data)
-    print("message_result:", message_result, '\n')
-
-    # Check the shipping result;
-    # if a failure, send it to the error microservice.
-    code = message_result["code"]
-    # if code not in range(200, 300):
-    #     # Inform the error microservice
-    #     #print('\n\n-----Invoking error microservice as message fails-----')
-    #     # print('\n\n-----Publishing the (message error) message with routing_key=message.error-----')
-
-    #     # invoke_http(error_URL, method="POST", json=message_result)
-    #     message = json.dumps(message_result)
-    #     amqp_setup.channel.basic_publish(exchange=amqp_setup.exchangename, routing_key="message.error", 
-    #         body=message, properties=pika.BasicProperties(delivery_mode = 2))
-
-    #     print("\nMessage status ({:d}) published to the RabbitMQ Exchange:".format(
-    #         code), message_result)
-
-    #     # 7. Return error
-    #     return {
-    #         "code": 400,
-    #         "data": {
-    #             "room_result": room_result,
-    #             "message_result": message_result
-    #         },
-    #         "message": "Message error sent for error handling."
-    #     }
-
-    # 7. Return created room, message
     return {
-        "code": 201,
+        "code": code,
         "data": {
-            "room_result": room_result,
-            "message_result": message_result
-        }
+            "room_result": room_result
+        },
+        "message": message
     }
 
 if __name__ == "__main__":
-    app.run(port=5102, debug=True)
+    print("This is flask " + os.path.basename(__file__) + " for leaving a room...")
+    app.run(host='0.0.0.0', port=5102, debug=True)
+    amqp_setup.check_setup()

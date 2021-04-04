@@ -1,5 +1,4 @@
 import sys
-sys.path.insert(0, '../simple')
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -8,10 +7,8 @@ import amqp_setup
 import pika
 from invokes import invoke_http
 
-
 app = Flask(__name__)
 CORS(app)
-
 
 # function to publish a sent message to the exchange of the room chat
 @app.route('/message/send', methods=['POST'])
@@ -85,5 +82,6 @@ def publish_message():
 
 
 if __name__ == "__main__":
-    app.run(port=5103, debug=True)
+    print("This is flask " + os.path.basename(__file__) + " for sending a message...")
+    app.run(host='0.0.0.0', port=5103, debug=True)
     amqp_setup.check_setup() # to make sure connection and channel are running

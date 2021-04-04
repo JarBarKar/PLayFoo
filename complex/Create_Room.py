@@ -2,22 +2,18 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 import os, sys
-sys.path.insert(0, '../simple')
 import requests
 from invokes import invoke_http
 
 import amqp_setup
 import pika
 import json
+from os import environ
 
 app = Flask(__name__)
 CORS(app)
 
-#user_URL = "http://localhost:5000/user"
-room_URL = "http://localhost:5001/room"
-# game_URL = "http://localhost:5002/game"
-message_URL = "http://localhost:5003/message"
-activity_log_URL = "http://localhost:5004/activity_log"
+room_URL = environ.get('room_URL')
 
 
 #Create Room (must send via JSON REQUEST)
@@ -66,8 +62,6 @@ def processCreateRoom(request_info):
     exchange_name = 'activity_error_exchange'
     print('create_room_result:', room_result)
 
-
-
     #for activity_log routing key
     if room_result['code'] in range(200, 300):
         print('\n\n-----Invoking activity_log microservice as room creation successful-----')
@@ -99,37 +93,13 @@ def processCreateRoom(request_info):
         print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(room_result)}")
 
 
-    
-    room_result_data = room_result['data']
-    message_result = invoke_http(
-        message_URL + "/create", method="POST", json=room_result_data)
-    print("message_result:", message_result, '\n')
-
-
-    # return {
-    #     "code": 201,
-    #     "data": {
-    #         "room_result": room_result,
-    #         "message_result": message_result
-    #     }
-    # }
-
-    # print('\n\n-----Sending request to message.py to create exchange and queue-----')    
-    
-    # room_result_data = room_result['data']
-    # message_result = invoke_http(
-    #     message_URL + "/create", method="POST", json=room_result_data)
-    # print("message_result:", message_result, '\n')
-
-    # return {
-    #     "code": 201,
-    #     "data": {
-    #         "room_result": room_result,
-    #         "message_result": message_result
-    #     }
-    # }
-
-
+    return {
+        "code": code,
+        "data": {
+            "room_result": room_result
+        },
+        "message": message
+    }
 
 
 # Execute this program if it is run as a main script (not by 'import')
