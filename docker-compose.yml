@@ -87,6 +87,8 @@ services:
     image: aarontanyien/message:1.0
     restart: always
     environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
       dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/message
       PYTHONUNBUFFERED: 1
 
@@ -100,6 +102,8 @@ services:
     image: aarontanyien/message_listener:1.0
     restart: always
     environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
       dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/message
       PYTHONUNBUFFERED: 1
 
@@ -125,7 +129,6 @@ services:
       user_URL: http://user:5000/user
       room_URL: http://room:5001/room
       game_URL: http://game:5002/game
-      activity_log_URL: 
       PYTHONUNBUFFERED: 1
     ports:
       - "5100:5100"

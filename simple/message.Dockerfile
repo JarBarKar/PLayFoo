@@ -1,6 +1,6 @@
 FROM python:3-slim
 WORKDIR /usr/src/app
-COPY http.reqs.txt amqp.reqs.txt ./
-RUN pip install --no-cache-dir -r http.reqs.txt -r amqp.reqs.txt
-COPY ./message.py ./amqp_setup.py ./
+COPY http.reqs.txt sqlalchemy.reqs.txt amqp.reqs.txt ./
+RUN pip install --no-cache-dir -r http.reqs.txt -r sqlalchemy.reqs.txt -r amqp.reqs.txt
+COPY ./amqp_setup.py ./message.py ./
 CMD [ "python", "./message.py" ]
