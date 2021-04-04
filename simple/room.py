@@ -137,9 +137,7 @@ def create_room():
             "message": "Room has successfully been created"
         },
     ), 201
-    return jsonify({
-        "data": member
-    })
+
 
 #Join Room
 @app.route("/room/<string:room_id>", methods=['POST'])
