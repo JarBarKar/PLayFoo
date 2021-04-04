@@ -6,6 +6,7 @@ from os import environ
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root@localhost:3306/room'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_recycle': 299}
 
 db = SQLAlchemy(app)
 
@@ -110,11 +111,19 @@ def create_room():
         print(data)
         room = Room(room_name=data['room_name'],game_id=int(data['game_id']),capacity=int(data['capacity']),host_id=data['host_id'])
         db.session.add(room)
-        db.session.commit()
-        room_id = Room.query.filter_by(host_id=data['host_id'], room_name=data['room_name']).first().room_id
-        member = Member(user_id=data['host_id'],room_name=data['room_name'], room_id=room_id)
-        db.session.add(member)
-        db.session.commit()
+        # db.session.commit()
+        # room_id = Room.query.filter_by(host_id=data['host_id'], room_name=data['room_name']).first().room_id
+        return jsonify(
+            {
+                "code": 209,
+                "data": environ.get('dbURL'),
+                "dbURL": app.config['SQLALCHEMY_DATABASE_URI'],
+                "message": "we got to this point at least."
+            }
+        ), 209
+        # member = Member(user_id=data['host_id'],room_name=data['room_name'], room_id=room_id)
+        # db.session.add(member)
+        # db.session.commit()
 
     except:
         print(f'\n\n---Cannot create Room: {data["room_name"]}...---')
