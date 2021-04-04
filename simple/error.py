@@ -1,16 +1,17 @@
 import json
 import os
-
 import amqp_setup
 from sqlalchemy import Table, Column, Integer, String, DateTime, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from os import environ
 
 import datetime as dt
 
 Base = declarative_base()
 
-engine = create_engine('mysql+mysqlconnector://root@localhost:3306/playfoo')
+# engine = create_engine('mysql+mysqlconnector://root@localhost:3306/error')
+engine = create_engine(environ.get('dbURL'))
 
 Session = sessionmaker(bind=engine)
 session = Session()

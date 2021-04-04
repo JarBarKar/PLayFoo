@@ -4,15 +4,18 @@ from flask_cors import CORS
 
 import json
 import amqp_setup
-import pika
+from sqlalchemy import Table, Column, Integer, String, DateTime, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from os import environ
 
 import datetime as dt
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/playfoo'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# engine = create_engine('mysql+mysqlconnector://root@localhost:3306/message')
+engine = create_engine(environ.get('dbURL'))
 
 db = SQLAlchemy(app)
 

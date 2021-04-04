@@ -19,10 +19,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `playfoo`
+-- Database: `room`
 --
-CREATE DATABASE IF NOT EXISTS `playfoo` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `playfoo`;
+CREATE DATABASE IF NOT EXISTS `room` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `room`;
 
 -- --------------------------------------------------------
 
@@ -83,6 +83,12 @@ COMMIT;
 -- --------------------------------------------------------
 
 --
+-- Database: `activity_log`
+--
+CREATE DATABASE IF NOT EXISTS `activity_log` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `activity_log`;
+
+--
 -- Table structure for table `activity_log`
 --
 
@@ -106,6 +112,12 @@ INSERT INTO `activity_log` (`activity_id`, `code`, `data`,`message`, `timestamp`
 COMMIT;
 
 -- --------------------------------------------------------
+
+--
+-- Database: `playfoo`
+--
+CREATE DATABASE IF NOT EXISTS `error` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `error`;
 
 --
 -- Table structure for table `error`
@@ -132,6 +144,12 @@ COMMIT;
 
 -- --------------------------------------------------------
 
+--
+-- Database: `message`
+--
+CREATE DATABASE IF NOT EXISTS `message` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `message`;
+
 -- Table structure for table `message`
 --
 
@@ -144,6 +162,8 @@ CREATE TABLE IF NOT EXISTS `message` (
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`message_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 
 --
 -- Dumping data for table `message`
@@ -158,6 +178,13 @@ INSERT INTO `message` (`message_id`, `room_id`, `user_id`, `content`, `timestamp
 (6,2, 'weaeb', 'booby',CURRENT_TIMESTAMP());
 COMMIT;
 
+-- --------------------------------------------------------
+
+--
+-- Database: `user`
+--
+CREATE DATABASE IF NOT EXISTS `user` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `user`;
 
 --
 -- Table structure for table `user`

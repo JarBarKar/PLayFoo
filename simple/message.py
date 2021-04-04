@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 import datetime as dt
+from os import environ
 
 Base = declarative_base()
 
