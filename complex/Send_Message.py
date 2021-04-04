@@ -1,68 +1,89 @@
+import sys
+sys.path.insert(0, '../simple')
 from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-
-import os, sys
-import requests
-from invokes import invoke_http
-import pika
-
 import json
+import amqp_setup
+import pika
+from invokes import invoke_http
+
 
 app = Flask(__name__)
 CORS(app)
 
-# user_URL = "http://localhost:5000/user"
-room_URL = "http://localhost:5001/room"
-# game_URL = "http://localhost:5002/game"
-message_URL = "http://localhost:5003/message"
 
-@app.route('/send', methods=['POST'])
-def send_message():
-    # Simple check of input format and data of the request are JSON
-    if request.is_json:
-        try:
-            # we expect room_id & user_id to be in request
-            request_info = request.get_json()
-            print("\nReceived a send message request in JSON:", request_info)
+# function to publish a sent message to the exchange of the room chat
+@app.route('/message/send', methods=['POST'])
+def publish_message():
+    request_info = request.get_json()
+    exchange_name = "roomchat"
+    routing_key = "message"
+    try:
+        user_id = request_info['user_id']
+        room_id = request_info['room_id']
+        content = request_info['content']
+        amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(request_info), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+        code = 200
+        message = "Message sent."
+    except Exception as e:
+        code = 500
+        message = "An error occurred while sending the message. " + str(e)
 
-            # do the actual work
-            # 1. send room and user info
-            result = processSendMessage(request_info)
-            print('\n------------------------')
-            print('\nresult: ', result)
-            return jsonify(result), result["code"]
-
-        except Exception as e:
-            # Unexpected error in code
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            ex_str = str(e) + " at " + str(exc_type) + ": " + fname + ": line " + str(exc_tb.tb_lineno)
-            print(ex_str)
-
-            return jsonify({
-                "code": 500,
-                "message": "Send_Message.py internal error: " + ex_str
-            }), 500
-
-    # if reached here, not a JSON request.
-    return jsonify({
-        "code": 400,
-        "message": "Invalid JSON input: " + str(request.get_data())
-    }), 400
-
-def processSendMessage(request_info):
-    print('\n\n-----Invoking message microservice-----')    
-    
-    message_result = invoke_http(
-        message_URL + "/send", method="POST", json=request_info)
-    print("message_result:", message_result, '\n')
-
-    return {
-        "code": 201,
-        "data": {
-            "message_result": message_result
+    if code in range(200, 300):
+        print('\n\n-----Invoking activity_log microservice as message sent successful-----')
+        exchange_name = 'activity_error_exchange'
+        routing_key = 'info'
+        code = 201
+        message = 'Message sent successfully'
+        message_result = {
+            "code": code,
+            "message": message,
+            "data" : request_info
         }
-    }
+        try:
+            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(message_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+        except Exception as e:
+            code=500
+            message = "An error occurred while sending the message. " + str(e)
+
+        print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(message_result)}")
+
+    #for error_log routing key
+    else:
+        print('\n\n-----Invoking error microservice as message fails to send-----')
+        exchange_name = 'activity_error_exchange'
+        routing_key = 'error'
+        code = 500
+        message = 'Message sent failed'
+        message_result = {
+            "code": code,
+            "message": message,
+            "data" : request_info
+        }
+        try:
+            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(message_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+            code = 500
+        except Exception as e:
+            code=500
+            message = "An error occurred while sending the message. " + str(e)
+
+        print(message)
+        print(f"\nOrder status {code} published to the RabbitMQ Exchange: {json.dumps(message_result)}")
+
+    return jsonify(
+        {
+            "code": code,
+            "data": {
+                "exchange_name": exchange_name,
+                "routing_key": routing_key,
+                "content": request_info
+            },
+            "message": message
+        }
+    ), code
+
 
 if __name__ == "__main__":
     app.run(port=5103, debug=True)
+    amqp_setup.check_setup() # to make sure connection and channel are running

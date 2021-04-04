@@ -66,9 +66,7 @@ def processCreateRoom(request_info):
     exchange_name = 'activity_error_exchange'
     print('create_room_result:', room_result)
 
-    #Setting up activity_log and error exchange
-    print('\n --Setting up exchange-- \n')
-    amqp_setup.channel.exchange_declare(exchange='activity_error_exchange', exchange_type='topic', durable=True)
+
 
     #for activity_log routing key
     if room_result['code'] in range(200, 300):

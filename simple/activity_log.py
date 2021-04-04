@@ -53,7 +53,7 @@ def callback(channel, method, properties, body): # required signature for the ca
     print() # print a new line feed
 
 def processOrderLog(data):
-    print(json.loads(data)['code'])
+    print("DIEEE")
     data = json.loads(data.decode('UTF-8'))
     #check if send to activity or error depending on code
     log = Activity_Log(code=data['code'],data=json.dumps(data['data']),message=data['message'])
@@ -61,9 +61,13 @@ def processOrderLog(data):
     session.add(log)
     session.commit()
     print("Recording an activity log:")
-    print(log)
+    print(log.json())
 
 
+
+#Setting up activity_log and error exchange
+print('\n --Setting up exchange-- \n')
+amqp_setup.channel.exchange_declare(exchange='activity_error_exchange', exchange_type='topic', durable=True)
 
 print('--Setting up activity_log queue-- \n')
 amqp_setup.channel.queue_declare(queue='activity_log_queue', durable=True)

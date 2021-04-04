@@ -48,8 +48,12 @@ def processErrorLog(data):
     session.add(log)
     session.commit()
     print("Recording an error log:")
-    print(log)
+    print(log.json())
 
+
+#Setting up activity_log and error exchange
+print('\n --Setting up exchange-- \n')
+amqp_setup.channel.exchange_declare(exchange='activity_error_exchange', exchange_type='topic', durable=True)
 
 #Setting up error queue
 print('--Setting up error queue-- \n')
