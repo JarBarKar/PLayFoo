@@ -4,12 +4,17 @@ Simple Microservices:
     5000: user.py
     5001: room.py
     5002: game.py
-    5004: activity_log.py
-    5005: error.py
-    5006: message_listener.py
+    5003: message_listener.py
+    amqp: message.py
+    amqp: activity_log.py
+    amqp: error.py
 
 Complex Microservices:
     5100: Create_Room.py
     5101: Join_Room.py
     5102: Leave_Room.py
     5103: Send_Message.py
+
+AMQP:
+    5672: RabbitMQ
+    15672: RabbitMQ management

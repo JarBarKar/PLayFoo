@@ -60,7 +60,5 @@ def listen_room(room_id):
             }
         ), 200
 
-
-
 if __name__ == "__main__":
-    app.run(port=5006, debug=True)
+    app.run(port=5003, debug=True)

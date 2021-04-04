@@ -135,7 +135,7 @@ def processCreateRoom(request_info):
 # Execute this program if it is run as a main script (not by 'import')
 if __name__ == "__main__":
     print("This is flask " + os.path.basename(__file__) + " for creating a room...")
-    app.run(port=5100, debug=True)
+    app.run(host='0.0.0.0', port=5100, debug=True)
     amqp_setup.check_setup() # to make sure connection and channel are running
 
     # Notes for the parameters: 
