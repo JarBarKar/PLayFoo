@@ -48,4 +48,4 @@ def find_by_user_id(user_id):
     ), 404
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
