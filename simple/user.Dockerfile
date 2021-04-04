@@ -1,6 +1,6 @@
 FROM python:3-slim
 WORKDIR /usr/src/app
-COPY ../requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY ../http.reqs.txt ./
+RUN pip install --no-cache-dir -r http.reqs.txt
 COPY ./amqp_setup.py ./invokes.py ./
 CMD [ "python", "./user.py" ]

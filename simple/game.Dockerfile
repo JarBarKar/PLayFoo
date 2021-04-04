@@ -2,5 +2,5 @@ FROM python:3-slim
 WORKDIR /usr/src/app
 COPY ../http.reqs.txt ./
 RUN pip install --no-cache-dir -r http.reqs.txt
-COPY ./room.py ./
-CMD [ "python", "./room.py" ]
+COPY ./game.py ./
+CMD [ "python", "./game.py" ]
