@@ -6,7 +6,7 @@ volumes:
 services:
  
   ###################################
-  # Room: The Room microservice
+  # Room: The Room simple microservice
   ###################################
   room:
     build:
@@ -15,71 +15,81 @@ services:
     image: aarontanyien/room:1.0
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/playfoo
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/room
       PYTHONUNBUFFERED: 1
- 
 
-#   ####################################
-#   # RabbitMQ: The messaging broker   
-#   ####################################
-#   rabbitmq:
-#     image: rabbitmq:3-management
-#     hostname: playfoo-rabbit
-#     restart: always
-#     ports:
-#       - "5672:5672"
-#       - "15672:15672"
-#     volumes: 
-#       - rabbitmq_data:/var/lib/rabbitmq
+  ####################################
+  # RabbitMQ: The messaging broker   
+  ####################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: playfoo-rabbit
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes: 
+      - rabbitmq_data:/var/lib/rabbitmq
       
-#   #################################################
-#   # Activity Log: The Activity Log microservice
-#   #################################################
-#   activity_log:
-#     build:
-#       context: ./simple
-#       dockerfile: activity_log.Dockerfile
-#     image: aarontanyien/activity_log:1.0
-#     restart: always
-#     depends_on:
-#       - rabbitmq
-#     environment:
-#       rabbit_host: rabbitmq
-#       rabbit_port: 5672
-#       PYTHONUNBUFFERED: 1
+  #################################################
+  # Activity Log: The Activity Log simple microservice
+  #################################################
+  activity_log:
+    build:
+      context: ./simple
+      dockerfile: activity_log.Dockerfile
+    image: aarontanyien/activity_log:1.0
+    restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+      dbURL: mysql+mysqlconnector://root@localhost:3306/activity_log
 
-#   ###################################
-#   # Error: The Error microservice
-#   ###################################
-#   error:
-#     build:
-#       context: ./simple
-#       dockerfile: error.Dockerfile
-#     image: aarontanyien/error:1.0
-#     restart: always
-#     depends_on:
-#       - rabbitmq
-#     environment:
-#       rabbit_host: rabbitmq
-#       rabbit_port: 5672
-#       PYTHONUNBUFFERED: 1
-
+  ###################################
+  # Error: The Error simple microservice
+  ###################################
+  error:
+    build:
+      context: ./simple
+      dockerfile: error.Dockerfile
+    image: aarontanyien/error:1.0
+    restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+      dbURL: mysql+mysqlconnector://root@localhost:3306/error
   
-#   ##################################
-#   # Message: The Message microservice
-#   ##################################
-#   message:
-#     build:
-#       context: ./simple
-#       dockerfile: message.Dockerfile
-#     image: aarontanyien/message:1.0
-#     restart: always
-#     environment:
-#       dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/playfoo
-#       PYTHONUNBUFFERED: 1
-#     ports:
-#       - "5000:5000"
+  ##################################
+  # Message: The Message simple microservice
+  ##################################
+  message:
+    build:
+      context: ./simple
+      dockerfile: message.Dockerfile
+    image: aarontanyien/message:1.0
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/message
+      PYTHONUNBUFFERED: 1
 
+  ##################################
+  # Message: The Message Listener simple microservice
+  ##################################
+  message:
+    build:
+      context: ./simple
+      dockerfile: message_listener.Dockerfile
+    image: aarontanyien/message_listener:1.0
+    restart: always
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/message
+      PYTHONUNBUFFERED: 1
 
 #   ###############################################
 #   # Create Room: The Create Room microservice

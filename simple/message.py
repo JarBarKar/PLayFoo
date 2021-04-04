@@ -5,11 +5,13 @@ import json
 import amqp_setup
 import pika
 import datetime as dt
+from os import environ
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/message'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/message'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -196,5 +198,5 @@ def leave_room_chat():
     ), code
 
 if __name__ == "__main__":
-    app.run(port=5003, debug=True)
+    app.run(host='0.0.0.0', port=5003, debug=True)
     amqp_setup.check_setup() # to make sure connection and channel are running
