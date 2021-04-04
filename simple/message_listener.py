@@ -1,62 +1,63 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-
 import json
+import os
+import amqp_setup
+from sqlalchemy import Table, Column, Integer, String, DateTime, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 import datetime as dt
 
-app = Flask(__name__)
-CORS(app)
+Base = declarative_base()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/playfoo'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+engine = create_engine('mysql+mysqlconnector://root@localhost:3306/playfoo')
 
-db = SQLAlchemy(app)
+Session = sessionmaker(bind=engine)
+session = Session()
 
-class Message(db.Model):
-    """
-    creates Message table with the following attributes:
-    message_id: int(6), primary key, auto increment
-    room_id: int(6), foreign key
-    user_id: varchar(12), foreign key
-    content: varchar(150)
-    """
+class Message(Base):
     __tablename__ = 'message'
+    message_id = Column(Integer(), primary_key=True)
+    room_id = Column(Integer(), nullable=False)
+    user_id = Column(String(12), nullable=False)
+    content = Column(String(150), nullable=False)
+    timestamp= Column(DateTime, default=dt.datetime.now())
 
-    message_id = db.Column(db.Integer(), primary_key=True)
-    room_id = db.Column(db.Integer(), nullable=False)
-    user_id = db.Column(db.String(12), nullable=False)
-    content = db.Column(db.String(150), nullable=False)
-    timestamp= db.Column(db.DateTime, default=dt.datetime.now())
-
-    def __init__(self, message_id, room_id, user_id, content, timestamp):
-        self.message_id = message_id
+    def __init__(self, room_id, user_id, content):
         self.room_id = room_id
         self.user_id = user_id
         self.content = content
-        self.timestamp = timestamp
-        
 
     def json(self):
         return {"message_id":self.message_id, "room_id":self.room_id, "user_id":self.user_id, "content":self.content, "timestamp":self.timestamp}
 
-# keep pinging for new messages (room_id)
-@app.route('/message/listen/<string:room_id>')
-def listen_room(room_id):
-    messagelist = Message.query.filter_by(room_id=room_id)
-    if messagelist:
-        return jsonify(
-            {
-                "code": 200,
-                "data": {
-                    'messages': [message.json() for message in messagelist]
-                }
-            }
-        ), 200
+
+def callback(channel, method, properties, body): # required signature for the callback; no return
+    print("\nReceived a log by " + __file__)
+    processOrderLog(body)
+    print() # print a new line feed
+
+def processOrderLog(data):
+    data = json.loads(data.decode('UTF-8'))
+    log = Message(room_id=data['room_id'],user_id=data['user_id'],content=data['content'])
+    session.add(log)
+    session.commit()
+    print("Recording an message sent:")
+    print(log.json())
 
 
+print('--Setting up exchange-- \n')
+amqp_setup.channel.exchange_declare(exchange='roomchat', exchange_type='fanout', durable=True)
 
-if __name__ == "__main__":
-    app.run(port=5006, debug=True)
+print('--Setting up message queue-- \n')
+amqp_setup.channel.queue_declare(queue='message_queue', durable=True)
+amqp_setup.channel.queue_bind(exchange='roomchat', queue='message_queue', routing_key='#.message')
 
+print('--Initiate message worker-- \n')
+amqp_setup.channel.basic_consume(queue='message_queue', on_message_callback=callback, auto_ack=True)
+
+
+print('\n--Start listening for messages....-- \n')
+amqp_setup.channel.start_consuming() # an implicit loop waiting to receive messages; 
+
+
+    

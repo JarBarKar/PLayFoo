@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-
 import json
 import amqp_setup
 import pika
+import datetime as dt
 
 app = Flask(__name__)
 CORS(app)
@@ -28,7 +28,7 @@ class Message(db.Model):
     room_id = db.Column(db.Integer(), nullable=False)
     user_id = db.Column(db.String(12), nullable=False)
     content = db.Column(db.String(150), nullable=False)
-    timestamp= db.Column(DateTime, default=dt.datetime.now())
+    timestamp= db.Column(db.DateTime, default=dt.datetime.now())
 
     def __init__(self, room_id, user_id, content):
         self.room_id = room_id
@@ -44,12 +44,10 @@ def create_room_chat():
     request_info = request.get_json()
     room_id = request_info['room_id']
     host_id = request_info['room_info']['host_id']
-
-
-    exchange_name= str(room_id) + "_roomchat"
+    exchange_name= "roomchat"
     exchange_type= "fanout"
     queue_name = host_id + "_queue"
-    routing_key = str(room_id) + "." + host_id
+    routing_key = str(room_id) + "." + "message"
     try:
         amqp_setup.channel.exchange_declare(exchange=exchange_name, exchange_type=exchange_type, durable=True)
         amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
@@ -78,9 +76,9 @@ def join_room_chat():
     user_id = request_info['user_id']
     room_id = request_info['room_id']
     
-    exchange_name= str(room_id) + "_roomchat"
+    exchange_name= "roomchat"
     queue_name = user_id + "_queue"
-    routing_key = str(room_id) + "." + user_id
+    routing_key = str(room_id) + "." + "message"
     try:
         amqp_setup.channel.queue_declare(queue=queue_name, durable=True)
         amqp_setup.channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
@@ -128,8 +126,8 @@ def publish_message():
     user_id = request_info['user_id']
     room_id = request_info['room_id']
     content = request_info['content']
-    exchange_name = str(room_id) + "_roomchat"
-    routing_key = str(room_id) + ".*"
+    exchange_name = "roomchat"
+    routing_key = str(room_id) + ".message"
     try:
         amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(request_info), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
         code = 200
@@ -160,8 +158,7 @@ def leave_room_chat():
     room_info = request_info['room_info']
     room_id = room_info['room_id']
     is_host = request_info['is_host']
-
-    exchange_name= str(room_id) + "_roomchat"
+    exchange_name= "roomchat"
 
     if is_host: # user is the host, we need to remove everyone from the room by deleting their queues
         member_ids = request_info['member_ids']
