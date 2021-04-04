@@ -111,19 +111,11 @@ def create_room():
         print(data)
         room = Room(room_name=data['room_name'],game_id=int(data['game_id']),capacity=int(data['capacity']),host_id=data['host_id'])
         db.session.add(room)
-        # db.session.commit()
-        # room_id = Room.query.filter_by(host_id=data['host_id'], room_name=data['room_name']).first().room_id
-        return jsonify(
-            {
-                "code": 209,
-                "data": environ.get('dbURL'),
-                "dbURL": app.config['SQLALCHEMY_DATABASE_URI'],
-                "message": "we got to this point at least."
-            }
-        ), 209
-        # member = Member(user_id=data['host_id'],room_name=data['room_name'], room_id=room_id)
-        # db.session.add(member)
-        # db.session.commit()
+        db.session.commit()
+        room_id = Room.query.filter_by(host_id=data['host_id'], room_name=data['room_name']).first().room_id
+        member = Member(user_id=data['host_id'],room_name=data['room_name'], room_id=room_id)
+        db.session.add(member)
+        db.session.commit()
 
     except:
         print(f'\n\n---Cannot create Room: {data["room_name"]}...---')
