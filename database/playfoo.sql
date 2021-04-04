@@ -61,10 +61,10 @@ COMMIT;
 
 DROP TABLE IF EXISTS `member`;
 CREATE TABLE IF NOT EXISTS `member` (
-  `room_id` int(6) NOT NULL AUTO_INCREMENT,
   `user_id` VARCHAR(128) NOT NULL,
   `room_name` VARCHAR(64) NOT NULL,
-  PRIMARY KEY (`room_id`,`user_id`, `room_name`)
+  `room_id` int(3) NOT NULL,
+  PRIMARY KEY (`user_id`, `room_name`, `room_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -72,12 +72,12 @@ CREATE TABLE IF NOT EXISTS `member` (
 --
 
 
-INSERT INTO `member` (`room_id`, `user_id`, `room_name`) VALUES
-(1, 'edwinlzs', 'First room everrrr'),
-(1, 'sugarbaby' , 'First room everrrr'),
-(2, 'weeb' , 'Second room everrrr'),
-(2, 'test', 'Second room everrrr'),
-(2, 'aaron', 'Second room everrrr');
+INSERT INTO `member` (`user_id`, `room_name`, `room_id`) VALUES
+('edwinlzs', 'First room everrrr', 1),
+('sugarbaby' , 'First room everrrr', 1),
+('weeb' , 'Second room everrrr', 2),
+('test', 'Second room everrrr', 2),
+('aaron', 'Second room everrrr', 2);
 COMMIT;
 
 -- --------------------------------------------------------

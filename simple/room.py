@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from os import environ
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/room'
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/room'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -28,24 +26,24 @@ class Room(db.Model):
         self.host_id = host_id
 
     def json(self):
-        return {"room_name": self.room_name, "capacity": self.capacity, "game_id":self.game_id, "host_id": self.host_id}
+        return {"room_id": self.room_id, "room_name": self.room_name, "capacity": self.capacity, "game_id":self.game_id, "host_id": self.host_id}
 
 
 class Member(db.Model):
     __tablename__ = 'member'
     user_id = db.Column(db.String(100), primary_key=True)
-    room_id = db.Column(db.Integer(), primary_key=True)
-    room_name = db.Column(db.String(64), nullable=False)
+    room_name = db.Column(db.String(64), primary_key=True)
+    room_id = db.Column(db.Integer(), nullable=False)
 
 
-    def __init__(self, user_id, room_id, room_name):
+    def __init__(self, user_id, room_name, room_id):
         self.user_id = user_id
-        self.room_id = room_id
         self.room_name = room_name
+        self.room_id = room_id
 
 
     def json(self):
-        return {"user_id": self.user_id, "room_id": self.room_id, "room_name":self.room_name}
+        return {"user_id": self.user_id, "room_name":self.room_name, "room_id": self.room_id}
 
 
 #Get room based on game_id
@@ -71,19 +69,52 @@ def get_room(game_id):
         }
     ), 404
 
+#Get room detail based on room_id
+@app.route("/room/detail/<string:room_id>")
+def get_room_detail(room_id):
+    selected_room = Room.query.filter_by(room_id=room_id).first()
+    members = Member.query.filter_by(room_id=room_id)
+    no_of_members = Member.query.filter_by(room_id=room_id).count()
+    try:
+        return jsonify(
+            {
+                "code" : 201,
+                "data": {
+                    "room_name": selected_room.room_name,
+                    "members":[member.user_id for member in members],
+                    "capacity": no_of_members
+                },
+                "message" : "Retrieved room detail."
+            }
+        ), 201
+
+    except:
+        return jsonify(
+            {
+                "code": 500,
+                "data": {
+                    "room_id": room_id
+                    },
+                "message": "An error retrieving the room detail."
+            }
+        ), 500
+
 #Create Room
 #For this section, some changes r made. When room is created. Both room and member tables will be updated. 
-# Unless someone can point to me how to use foreign key
 @app.route("/room", methods=['POST'])
 def create_room():
     data = request.get_json()
     try:
         print(f'\n\n---Creating Room: {data["room_name"]}...---')
-        room = Room(room_name=data['room_name'],game_id=data['game_id'],capacity=data['capacity'],host_id=data['host_id'])
-        member = Member(room.host_id,room.room_id,room.room_name)
+        print(data)
+        room = Room(room_name=data['room_name'],game_id=int(data['game_id']),capacity=int(data['capacity']),host_id=data['host_id'])
         db.session.add(room)
+        db.session.commit()
+        room_id = Room.query.filter_by(host_id=data['host_id'], room_name=data['room_name']).first().room_id
+        member = Member(user_id=data['host_id'],room_name=data['room_name'], room_id=room_id)
         db.session.add(member)
         db.session.commit()
+
     except:
         print(f'\n\n---Cannot create Room: {data["room_name"]}...---')
         return jsonify(
@@ -99,11 +130,16 @@ def create_room():
             "code": 201,
             "data": {
                 "room_id": room.room_id,
-                "room_info": room.json()
+                "room_info": room.json(),
+                "room_name": room.room_name,
+                "members" : [member.user_id for member in Member.query.filter_by(room_name=room.room_name).all()]
             },
             "message": "Room has successfully been created"
         },
     ), 201
+    return jsonify({
+        "data": member
+    })
 
 #Join Room
 @app.route("/room/<string:room_id>", methods=['POST'])
@@ -212,4 +248,4 @@ def leave_room():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(port=5001, debug=True)
