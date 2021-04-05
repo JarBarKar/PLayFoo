@@ -17,6 +17,7 @@ items:
     selector:
       io.kompose.service: kong
     type: LoadBalancer
+    clusterIP: 10.98.30.90
   status:
     loadBalancer: {}
 - apiVersion: apps/v1
@@ -76,6 +77,7 @@ items:
       targetPort: 5432
     selector:
       io.kompose.service: kong-database
+    clusterIP: 10.98.30.91
   status:
     loadBalancer: {}
 - apiVersion: apps/v1
@@ -157,6 +159,7 @@ items:
       targetPort: 1337
     selector:
       io.kompose.service: konga
+    clusterIP: 10.98.30.92
     type: LoadBalancer
   status:
     loadBalancer: {}
@@ -237,6 +240,7 @@ items:
       targetPort: 15672
     selector:
       io.kompose.service: rabbitmq
+    clusterIP: 10.98.30.93
   status:
     loadBalancer: {}
 - apiVersion: v1
@@ -331,6 +335,7 @@ items:
       targetPort: 3306
     selector:
       io.kompose.service: mysql-database
+    clusterIP: 10.98.30.94
   status:
     loadBalancer: {}
 - apiVersion: apps/v1
@@ -392,7 +397,6 @@ items:
       requests:
         storage: 100Mi
   status: {}
-
 - apiVersion: v1
   kind: Service
   metadata:
@@ -406,6 +410,7 @@ items:
       targetPort: 80
     selector:
       io.kompose.service: phpmyadmin
+    clusterIP: 10.98.30.95
     type: LoadBalancer
   status:
     loadBalancer: {}

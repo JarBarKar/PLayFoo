@@ -11,6 +11,7 @@ items:
     - name: "5100"
       port: 5100
       targetPort: 5100
+    clusterIP: 10.98.31.90
     selector:
       io.kompose.service: create-room
   status:
@@ -68,6 +69,7 @@ items:
     - name: "5101"
       port: 5101
       targetPort: 5101
+    clusterIP: 10.98.31.91
     selector:
       io.kompose.service: join-room
   status:
@@ -128,6 +130,7 @@ items:
       targetPort: 5102
     selector:
       io.kompose.service: leave-room
+    clusterIP: 10.98.31.92
   status:
     loadBalancer: {}
 - apiVersion: apps/v1
@@ -184,6 +187,7 @@ items:
       targetPort: 5103
     selector:
       io.kompose.service: send-message
+    clusterIP: 10.98.31.93
   status:
     loadBalancer: {}
 - apiVersion: apps/v1
