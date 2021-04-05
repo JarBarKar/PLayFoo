@@ -56,6 +56,9 @@ items:
     - name: "8000"
       port: 8000
       targetPort: 8000
+    - name: "8001"
+      port: 8001
+      targetPort: 8001
     selector:
       io.kompose.service: kong
   status:
@@ -208,6 +211,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: activity-log
       spec:
         containers:
@@ -228,6 +232,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -253,6 +271,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: create-room
       spec:
         containers:
@@ -279,6 +298,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -304,6 +337,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: error
       spec:
         containers:
@@ -324,6 +358,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -349,6 +397,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: game
       spec:
         containers:
@@ -363,6 +412,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -388,6 +451,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: join-room
       spec:
         containers:
@@ -414,6 +478,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -439,7 +517,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
-          io.kompose.network/kong-net: "true"
+          io.kompose.network/playfoo: "true"
           io.kompose.service: kong
       spec:
         containers:
@@ -461,6 +539,7 @@ items:
           name: kong
           ports:
           - containerPort: 8000
+          - containerPort: 8001
           resources: {}
         restartPolicy: Always
         serviceAccountName: ""
@@ -470,16 +549,16 @@ items:
   kind: NetworkPolicy
   metadata:
     creationTimestamp: null
-    name: kong-net
+    name: playfoo
   spec:
     ingress:
     - from:
       - podSelector:
           matchLabels:
-            io.kompose.network/kong-net: "true"
+            io.kompose.network/playfoo: "true"
     podSelector:
       matchLabels:
-        io.kompose.network/kong-net: "true"
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -506,7 +585,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
-          io.kompose.network/kong-net: "true"
+          io.kompose.network/playfoo: "true"
           io.kompose.service: kong-database
       spec:
         containers:
@@ -560,22 +639,22 @@ items:
   kind: NetworkPolicy
   metadata:
     creationTimestamp: null
-    name: kong-net
+    name: playfoo
   spec:
     ingress:
     - from:
       - podSelector:
           matchLabels:
-            io.kompose.network/kong-net: "true"
+            io.kompose.network/playfoo: "true"
     podSelector:
       matchLabels:
-        io.kompose.network/kong-net: "true"
+        io.kompose.network/playfoo: "true"
 - apiVersion: v1
   kind: Pod
   metadata:
     creationTimestamp: null
     labels:
-      io.kompose.network/kong-net: "true"
+      io.kompose.network/playfoo: "true"
       io.kompose.service: kong-migration
     name: kong-migration
   spec:
@@ -602,16 +681,16 @@ items:
   kind: NetworkPolicy
   metadata:
     creationTimestamp: null
-    name: kong-net
+    name: playfoo
   spec:
     ingress:
     - from:
       - podSelector:
           matchLabels:
-            io.kompose.network/kong-net: "true"
+            io.kompose.network/playfoo: "true"
     podSelector:
       matchLabels:
-        io.kompose.network/kong-net: "true"
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -638,7 +717,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
-          io.kompose.network/kong-net: "true"
+          io.kompose.network/playfoo: "true"
           io.kompose.service: konga
       spec:
         containers:
@@ -687,16 +766,16 @@ items:
   kind: NetworkPolicy
   metadata:
     creationTimestamp: null
-    name: kong-net
+    name: playfoo
   spec:
     ingress:
     - from:
       - podSelector:
           matchLabels:
-            io.kompose.network/kong-net: "true"
+            io.kompose.network/playfoo: "true"
     podSelector:
       matchLabels:
-        io.kompose.network/kong-net: "true"
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -722,6 +801,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: leave-room
       spec:
         containers:
@@ -746,6 +826,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -771,6 +865,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: message
       spec:
         containers:
@@ -791,6 +886,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -816,6 +925,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: message-lister
       spec:
         containers:
@@ -838,6 +948,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -864,6 +988,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: rabbitmq
       spec:
         containers:
@@ -899,6 +1024,20 @@ items:
       requests:
         storage: 100Mi
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -924,6 +1063,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: room
       spec:
         containers:
@@ -940,6 +1080,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -965,6 +1119,7 @@ items:
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
+          io.kompose.network/playfoo: "true"
           io.kompose.service: send-message
       spec:
         containers:
@@ -989,6 +1144,20 @@ items:
         serviceAccountName: ""
         volumes: null
   status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
 kind: List
 metadata: {}
 
