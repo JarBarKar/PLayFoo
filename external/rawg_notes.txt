@@ -1,9 +1,0 @@
-GET https://api.rawg.io/api/games?
-parameters:
-    key
-    genres (genre id/name. can use genres call in rawgtest to get list of genres and their ids. id 4 = RPG)
-    page
-    page_size
-    platforms (platform id. can use the platforms call in rawgtest to get list of platforms and their ids)
-    ordering (can order by name, rating etc. -rating denotes reverse rating order)
-    search (search query)

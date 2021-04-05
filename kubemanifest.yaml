@@ -474,7 +474,7 @@ items:
       io.kompose.service: room
     name: room
   spec:
-    replicas: 1
+    replicas: 2
     selector:
       matchLabels:
         io.kompose.service: room
@@ -490,7 +490,7 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: dbURL
-            value: mysql+mysqlconnector://admin@10.99.100.158:3306/room
+            value: mysql+mysqlconnector://admin@10.98.30.94:3306/room
           ports:
           - containerPort: 5001
           image: aarontanyien/room:1.0
@@ -524,7 +524,7 @@ items:
       io.kompose.service: message-listener
     name: message-listener
   spec:
-    replicas: 1
+    replicas: 3
     selector:
       matchLabels:
         io.kompose.service: message-listener
@@ -541,7 +541,7 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: dbURL
-            value: mysql+mysqlconnector://is213@host.docker.internal:3306/message
+            value: mysql+mysqlconnector://admin@10.98.30.94:3306/message
           - name: rabbit_host
             value: rabbitmq
           - name: rabbit_port
@@ -563,7 +563,7 @@ items:
       io.kompose.service: activity-log
     name: activity-log
   spec:
-    replicas: 1
+    replicas: 2
     selector:
       matchLabels:
         io.kompose.service: activity-log
@@ -580,7 +580,7 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: dbURL
-            value: mysql+mysqlconnector://is213@host.docker.internal:3306/activity_log
+            value: mysql+mysqlconnector://admin@10.98.30.94:3306/activity_log
           - name: rabbit_host
             value: rabbitmq
           - name: rabbit_port
@@ -617,7 +617,7 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: dbURL
-            value: mysql+mysqlconnector://is213@host.docker.internal:3306/error
+            value: mysql+mysqlconnector://admin@10.98.30.94:3306/error
           - name: rabbit_host
             value: rabbitmq
           - name: rabbit_port
@@ -686,7 +686,7 @@ items:
       io.kompose.service: message
     name: message
   spec:
-    replicas: 1
+    replicas: 3
     selector:
       matchLabels:
         io.kompose.service: message
@@ -703,7 +703,7 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: dbURL
-            value: mysql+mysqlconnector://is213@host.docker.internal:3306/message
+            value: mysql+mysqlconnector://admin@10.98.30.94:3306/message
           - name: rabbit_host
             value: rabbitmq
           - name: rabbit_port
@@ -756,7 +756,7 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: dbURL
-            value: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+            value: mysql+mysqlconnector://admin@10.98.30.94:3306/user
           ports:
           - containerPort: 5000
           image: aarontanyien/user:1.0
@@ -806,15 +806,15 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: game_URL
-            value: http://game:5002/game
+            value: http://10.98.32.92:5002/game
           - name: rabbit_host
             value: rabbitmq
           - name: rabbit_port
             value: "5672"
           - name: room_URL
-            value: http://10.105.231.40:5001/room
+            value: http://10.98.32.91:5001/room
           - name: user_URL
-            value: http://user:5000/user
+            value: http://10.98.32.90:5000/user
           image: aarontanyien/create_room:1.0
           imagePullPolicy: ""
           name: create-room
@@ -865,15 +865,15 @@ items:
           - name: PYTHONUNBUFFERED
             value: "1"
           - name: game_URL
-            value: http://game:5002/game
+            value: http://10.98.32.92:5002/game
           - name: rabbit_host
             value: rabbitmq
           - name: rabbit_port
             value: "5672"
           - name: room_URL
-            value: http://localhost:5001/room
+            value: http://10.98.32.91:5001/room
           - name: user_URL
-            value: http://user:5000/user
+            value: http://10.98.32.90:5000/user
           image: aarontanyien/join_room:1.0
           imagePullPolicy: ""
           name: join-room
@@ -928,9 +928,9 @@ items:
           - name: rabbit_port
             value: "5672"
           - name: room_URL
-            value: http://localhost:5001/room
+            value: http://10.98.32.91:5001/room
           - name: user_URL
-            value: http://user:5000/user
+            value: http://10.98.32.90:5000/user
           image: aarontanyien/leave_room:1.0
           imagePullPolicy: ""
           name: leave-room
@@ -964,7 +964,7 @@ items:
       io.kompose.service: send-message
     name: send-message
   spec:
-    replicas: 1
+    replicas: 3
     selector:
       matchLabels:
         io.kompose.service: send-message
@@ -985,9 +985,9 @@ items:
           - name: rabbit_port
             value: "5672"
           - name: room_URL
-            value: http://localhost:5001/room
+            value: http://10.98.32.91:5001/room
           - name: user_URL
-            value: http://user:5000/user
+            value: http://10.98.32.90:5000/user
           image: aarontanyien/send_message:1.0
           imagePullPolicy: ""
           name: send-message
