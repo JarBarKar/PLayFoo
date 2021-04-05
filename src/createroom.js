@@ -11,6 +11,7 @@ function Createroom(props) {
   const user = localStorage.getItem('user');
   const gameid = localStorage.getItem('gameid');
   console.log(gameid)
+  const roomid = localStorage.getItem('gameid')
 
   const { register, handleSubmit } = useForm({
     defaultValues: {
@@ -23,15 +24,16 @@ function Createroom(props) {
 
   async function getData(data) {
     try{
+      debugger
       const onSubmit =
         await axios({
           method: 'post',
-          url: 'http://localhost:8000/create_room',
+          url: 'http://localhost:5100/create_room',
           data: data
         })
       if (onSubmit.status == 201){
-        // console.log(onSubmit);
-        history.push(`/room/${onSubmit.data.data.room_id}`);
+        console.log(onSubmit);
+        history.push(`/room/${onSubmit.data.data.room_result.data.room_info.room_id}`);
         // alert("You have successfully created room " + data.roomid);
       }
       return onSubmit.status
@@ -56,10 +58,10 @@ function Createroom(props) {
       <Modal.Body>
 
         <form onSubmit={handleSubmit(getData)}>
-          {/* <div>
+          <div style={{display: 'none'}}>
             <h4 style={{color: 'white', float:'left', width:'35%'}}>Room ID #</h4>
             <input type="number" readOnly name="game_id" ref={register} placeholder="Room Id #" style={{marginLeft: '20%'}}/>
-          </div> */}
+          </div>
           &nbsp;
           <div>
             <h4 style={{color: 'white', float:'left', width:'35%'}}>Owner</h4>

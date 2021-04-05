@@ -28,7 +28,6 @@ export default function Login() {
     let data = {user_id: user}
     console.log(data)
     try{
-        debugger
       const onSubmit =
         await axios({
             headers: {
@@ -36,7 +35,7 @@ export default function Login() {
             },
             mode: 'no-cors',
             method: 'post',
-            url: 'http://localhost:5000/user',
+            url: 'http://localhost:5000/userid',
             data: data
         })
       if (onSubmit.status == 200){

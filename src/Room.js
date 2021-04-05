@@ -15,6 +15,8 @@ function Room( {match} ) {
     const [value, setValue] = useState("");
     const room_id = match.params.roomid;
     localStorage.setItem('roomid', room_id);
+    console.log(match)
+    const roomid = match.params.roomid
 
     const handleChange = e => {
         setValue(e.target.value);
@@ -38,8 +40,9 @@ function Room( {match} ) {
           const onSubmit =
             await axios({
               method: 'post',
-              url: 'http://localhost:8000/send_message',
-              data: data
+              url: 'http://localhost:5103/send_message',
+              data: data,
+              credentials: 'include'
             })
         //   if (onSubmit.status == 201){
         //     history.push(`/home`);
@@ -56,16 +59,26 @@ function Room( {match} ) {
     const user = localStorage.getItem("user");
     const gameid = localStorage.getItem("gameid");
 
-    const [rooms, setRooms] = useState([]);
+    const [rooms, setRooms] = useState({
+        "capacity": "",
+        "members": []
+    });
    
     useEffect(async () => {
-        const result = await axios("http://localhost:5001/room/detail/" + room_id
-      );
+        console.log(roomid)
+        const result =
+            await axios({
+              method: 'post',
+              url: "http://localhost:5001/room_id_room_detail",
+              data: {"room_id":roomid}
+            })
+      ;
+    //   setFriends(result.data.data)
       setRooms(result.data.data);
       return result;
     }, []);
 
-    // console.log(rooms.members)
+    console.log(rooms)
 
     async function LeaveRoom() {
         let data = {room_id: room_id, user_id: user }
@@ -74,7 +87,7 @@ function Room( {match} ) {
           const onSubmit =
             await axios({
               method: 'delete',
-              url: 'http://localhost:8000/leave_room',
+              url: 'http://localhost:5102/leave',
               data: data
             })
           if (onSubmit.status == 201){
@@ -88,17 +101,21 @@ function Room( {match} ) {
         }
       }
 
-    function getMembers() {
-        try {
-            var members_list = [];
-            if (rooms.members != "undefined") {
-                members_list = rooms.members;
-            }
-            return members_list
-        } catch (err) {
-            console.error(err.message);
-        } 
-    }
+    // const [ friends, setFriends] =  useState({
+    //     "capacity": "",
+    //     "members": []
+    // });
+
+    // async function getMembers() {
+    //     if (rooms != [] ) {
+    //         setFriends(rooms.members);
+    //         return friends;
+    //     }
+    //         // console.log(members_list)
+        
+    //     console.log(friends)
+    //     return friends
+    //     }
 
     return (
         <div className="row">
@@ -130,15 +147,11 @@ function Room( {match} ) {
                                 <h5>Members</h5>
                             </div>
 
-                            {/* {Array.from(getMembers()).map((_, index) => (
+                            {Array.from(rooms.members).map((_, index) => (
                                 <div className='friend'>
-                                    {getMembers()[index]}
-                                </div> */}
-                            {/* ))} */}
-
-                                <div className='friend'>
-                                    {getMembers()}
+                                    {rooms.members[index]}
                                 </div>
+                            ))}
 
                         </div>
                     </div>

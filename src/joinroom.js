@@ -15,18 +15,40 @@ function Joinroom(props) {
   const gameid = localStorage.getItem("gameid");
   const roomid= localStorage.getItem("roomid");
 
-  const [rooms, setRooms] = useState([]);
+  const [rooms_data, setRooms] = useState({
+    "capacity": [],
+      "rooms": [
+          {
+              "capacity": "",
+              "game_id": "",
+              "host_id": "",
+              "room_id": "",
+              "room_name": ""
+          }
+      ]
+    });
    
   useEffect(async () => {
-      console.log('running');
-      const result = await axios("http://localhost:5001/room/" + gameid
-    );
-    // console.log(result)
-    setRooms(result.data.data.rooms);
-    return result;
-  }, []);
+        try{ 
+            const onSubmit =
+                await axios({
+                method: 'post',
+                url: 'http://localhost:5001/game_id_room_detail',
+                data: {"game_id" : gameid}
+            })
+            if (onSubmit.status == 200){
+                console.log(onSubmit)
+                setRooms(onSubmit.data.data);
+            // return result;
+            }
+            return onSubmit.status
+        }
+        catch (err) {
+            console.log(err);
+        }
+    })
 
-  console.log(rooms);
+//   console.log(rooms_data);
 
   async function SelectRoom(data) {
     let fdata = {room_id: data.room_id, room_name: data.room_name, user_id: user_id};
@@ -35,7 +57,7 @@ function Joinroom(props) {
       const onSubmit =
         await axios({
           method: 'post',
-          url: 'http://localhost:8000/join_room',
+          url: 'http://localhost:5101/join',
           data: fdata
         })
         // console.log(onSubmit)
@@ -88,22 +110,35 @@ function Joinroom(props) {
                   </tr>
               </thead>
               <tbody>
-                    {Array.from(rooms).map((_, index) => ( 
-                      // console.log("loop")
-                      <tr style={{color: 'white'}}>
-                          {rooms[index].room_id}
-                          <td>{rooms[index].room_name}</td>
-                          <td>{rooms[index].host_id}</td>
-                          <td>{rooms[index].capacity}
-                          <Button 
-                            type="submit" 
-                            variant="secondary" 
-                            style={{float: "right",}} 
-                            onClick={() => SelectRoom(rooms[index])}
-                          >Join</Button>
+                    <tr style={{color: 'white'}}>
+                          1
+                          <td>First Room</td>
+                          <td>Edwin</td>
+                          <td>2/2
+                            <Button 
+                                type="submit" 
+                                variant="secondary" 
+                                style={{float: "right",}} 
+                                disabled
+                            >Join</Button>
                           </td>
                       </tr>
-                  ))}
+                      {Array.from(rooms_data.rooms).map((_, index) => ( 
+                        <tr style={{color: 'white'}}>
+                            {rooms_data.rooms[index].room_id}
+                            {localStorage.setItem("roomid", rooms_data.rooms[index].room_id)}
+                            <td>{rooms_data.rooms[index].room_name}</td>
+                            <td>{rooms_data.rooms[index].host_id}</td>
+                            <td> {rooms_data.capacity[0]}/{rooms_data.rooms[index].capacity}
+                            <Button 
+                                type="submit" 
+                                variant="secondary" 
+                                style={{float: "right",}}
+                                onClick={() => SelectRoom(rooms_data.rooms[index])}
+                            >Join</Button>
+                            </td>
+                        </tr>
+                    ))}
               </tbody>
           </Table>
       </Modal.Body>

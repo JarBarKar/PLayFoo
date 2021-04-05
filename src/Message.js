@@ -18,7 +18,7 @@ function Message( {match} ) {
           const onSubmit =
             await axios({
               method: 'post',
-              url: 'http://localhost:8000/ping_message',
+              url: 'http://localhost:5003/message_lister',
               data: data
             })
           if (onSubmit.status == 200){
