@@ -295,7 +295,6 @@ services:
       - kong-migration
     ports:
       - "8000:8000"
-      - "8001:8001"
   
   #######################################
   # Konga: Kong GUI
