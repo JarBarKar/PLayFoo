@@ -1,0 +1,54 @@
+.row {
+  color: white;
+  margin-left: 20px;
+}
+
+.card {
+  background: black !important;
+}
+
+.block {
+  background-color: #111;
+  height: 120px;
+  width: 100%;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 15vw;
+  object-fit: cover;
+}
+
+.row_title {
+  margin-left: 12%;
+  color: #fff;
+}
+
+.title_fontsize {
+  font-size: medium;
+  font-weight: 400px;
+}
+
+.row_posters {
+  /* turn column into row */
+  /* display: flex; */
+  /* overflow-y: hidden;
+  overflow-x: scroll; */
+  padding: 20px;
+}
+
+.row_posters::-webkit-scrollbar {
+  /* tell all the browser to don't display scroll bar */
+  display: none;
+}
+
+.col-md-3 {
+  flex: 0 0 33.3333333%;
+  max-width: 33.3333333%;
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  display: flex;
+  margin-bottom: 20px;
+}

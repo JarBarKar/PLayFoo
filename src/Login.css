@@ -1,0 +1,18 @@
+/* .block {
+  width: 100%;
+  margin-left: auto;
+} */
+
+body {
+  background-image: url("https://preview.redd.it/vda9rbt01en01.png?width=960&crop=smart&auto=webp&s=a669dd6fe1a2f38c08684b43f0253f2dd4d6f9a0");
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.loginbox {
+  margin: auto;
+  margin-top: 10%;
+  color: white;
+  max-width: 320px;
+}

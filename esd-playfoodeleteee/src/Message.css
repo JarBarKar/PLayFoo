@@ -1,0 +1,16 @@
+.convo {
+  height: 550px;
+  position: relative;
+  display: table-cell;
+  vertical-align: bottom;
+  width: 2000px;
+  /* flex-direction: column-reverse; */
+}
+.content {
+  width: 100%;
+  bottom: 0;
+  /* position: absolute; */
+  max-height: 98%;
+  overflow-y: auto;
+  align-self: flex-end;
+}
