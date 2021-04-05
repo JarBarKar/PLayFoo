@@ -4,6 +4,7 @@ volumes:
   rabbitmq_data:
   pgdata: 
   kongadata:
+  mysqldata:
 
 networks:
   playfoo:
@@ -331,3 +332,38 @@ services:
       - "1337:1337"
     volumes:
       - kongadata:/app/kongadata
+
+  #######################################
+  # MySQL & PHPMyAdmin: The primary database & interface
+  #######################################
+  mysql-database:
+    container_name: mysql-database
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    networks:
+      - playfoo
+    environment:
+      MYSQL_USER: admin
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_PASSWORD: admin
+    volumes:
+      - mysqldata:/var/lib/playfoo/data
+    ports:
+      - '3306:3306'
+  
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    depends_on:
+      - mysql-database
+    ports:
+      - "8082:80"
+    networks:
+      - playfoo
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: admin
+      PMA_HOST: mysql-database
+      # PMA_USER: root
+      # PMA_PASSWORD: admin

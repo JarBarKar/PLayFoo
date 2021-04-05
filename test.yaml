@@ -4,7 +4,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -23,7 +23,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -42,7 +42,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -53,9 +53,6 @@ items:
     - name: "8000"
       port: 8000
       targetPort: 8000
-    - name: "8001"
-      port: 8001
-      targetPort: 8001
     selector:
       io.kompose.service: kong
   status:
@@ -64,7 +61,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -83,7 +80,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -102,7 +99,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -121,7 +118,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -140,7 +137,45 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: mysql-database
+    name: mysql-database
+  spec:
+    ports:
+    - name: "3306"
+      port: 3306
+      targetPort: 3306
+    selector:
+      io.kompose.service: mysql-database
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: phpmyadmin
+    name: phpmyadmin
+  spec:
+    ports:
+    - name: "8082"
+      port: 8082
+      targetPort: 80
+    selector:
+      io.kompose.service: phpmyadmin
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -162,7 +197,7 @@ items:
   kind: Service
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -181,7 +216,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -196,7 +231,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -239,7 +274,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -254,7 +289,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -303,7 +338,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -318,7 +353,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -361,7 +396,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -376,7 +411,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -413,7 +448,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -428,7 +463,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -477,7 +512,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -492,7 +527,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -518,7 +553,6 @@ items:
           name: kong
           ports:
           - containerPort: 8000
-          - containerPort: 8001
           resources: {}
         restartPolicy: Always
         serviceAccountName: ""
@@ -542,7 +576,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -558,7 +592,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -672,7 +706,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -688,7 +722,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -755,7 +789,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -770,7 +804,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -817,7 +851,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -832,7 +866,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -875,7 +909,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -890,7 +924,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -935,7 +969,146 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: mysql-database
+    name: mysql-database
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: mysql-database
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        creationTimestamp: null
+        labels:
+          io.kompose.network/playfoo: "true"
+          io.kompose.service: mysql-database
+      spec:
+        containers:
+        - args:
+          - --default-authentication-plugin=mysql_native_password
+          env:
+          - name: MYSQL_PASSWORD
+            value: admin
+          - name: MYSQL_ROOT_PASSWORD
+            value: admin
+          - name: MYSQL_USER
+            value: admin
+          image: mysql:latest
+          imagePullPolicy: ""
+          name: mysql-database
+          ports:
+          - containerPort: 3306
+          resources: {}
+          volumeMounts:
+          - mountPath: /var/lib/playfoo/data
+            name: mysqldata
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes:
+        - name: mysqldata
+          persistentVolumeClaim:
+            claimName: mysqldata
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: mysqldata
+    name: mysqldata
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 100Mi
+  status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
+      kompose.version: 1.21.0 (992df58d8)
+    creationTimestamp: null
+    labels:
+      io.kompose.service: phpmyadmin
+    name: phpmyadmin
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: phpmyadmin
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
+          kompose.version: 1.21.0 (992df58d8)
+        creationTimestamp: null
+        labels:
+          io.kompose.network/playfoo: "true"
+          io.kompose.service: phpmyadmin
+      spec:
+        containers:
+        - env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: admin
+          - name: MYSQL_USER
+            value: root
+          - name: PMA_HOST
+            value: mysql-database
+          image: phpmyadmin/phpmyadmin:latest
+          imagePullPolicy: ""
+          name: phpmyadmin
+          ports:
+          - containerPort: 80
+          resources: {}
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: extensions/v1beta1
+  kind: NetworkPolicy
+  metadata:
+    creationTimestamp: null
+    name: playfoo
+  spec:
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            io.kompose.network/playfoo: "true"
+    podSelector:
+      matchLabels:
+        io.kompose.network/playfoo: "true"
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -951,7 +1124,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -1009,7 +1182,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -1024,7 +1197,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -1063,7 +1236,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -1078,7 +1251,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
@@ -1125,7 +1298,7 @@ items:
   kind: Deployment
   metadata:
     annotations:
-      kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+      kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
       kompose.version: 1.21.0 (992df58d8)
     creationTimestamp: null
     labels:
@@ -1140,7 +1313,7 @@ items:
     template:
       metadata:
         annotations:
-          kompose.cmd: kompose convert -f docker-compose.yml -o kubemanifests.yaml
+          kompose.cmd: kompose convert -f docker-compose.yml -o test.yaml
           kompose.version: 1.21.0 (992df58d8)
         creationTimestamp: null
         labels:
