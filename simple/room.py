@@ -18,7 +18,7 @@ class Room(db.Model):
     game_id= db.Column(db.Integer(), nullable=False)
     capacity = db.Column(db.Integer(), nullable=False)
     host_id = db.Column(db.String(12), nullable=False)
-    
+
 
     def __init__(self, room_name, game_id, capacity, host_id):
         self.room_name = room_name
