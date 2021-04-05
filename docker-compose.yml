@@ -2,6 +2,12 @@ version: "3"
 
 volumes:
   rabbitmq_data:
+  pgdata: 
+  kongadata:
+
+networks:
+  playfoo:
+    driver: bridge
 
 services:
  
@@ -14,6 +20,8 @@ services:
       dockerfile: room.Dockerfile
     image: aarontanyien/room:1.0
     restart: always
+    networks:
+      - playfoo
     environment:
       dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/room
       PYTHONUNBUFFERED: 1
@@ -27,6 +35,8 @@ services:
       dockerfile: game.Dockerfile
     image: aarontanyien/game:1.0
     restart: always
+    networks:
+      - playfoo
     environment:
       PYTHONUNBUFFERED: 1
 
@@ -37,6 +47,8 @@ services:
     image: rabbitmq:3-management
     hostname: playfoo-rabbit
     restart: always
+    networks:
+      - playfoo
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -52,6 +64,8 @@ services:
       dockerfile: activity_log.Dockerfile
     image: aarontanyien/activity_log:1.0
     restart: always
+    networks:
+      - playfoo
     depends_on:
       - rabbitmq
     environment:
@@ -69,6 +83,8 @@ services:
       dockerfile: error.Dockerfile
     image: aarontanyien/error:1.0
     restart: always
+    networks:
+      - playfoo
     depends_on:
       - rabbitmq
     environment:
@@ -86,6 +102,8 @@ services:
       dockerfile: message.Dockerfile
     image: aarontanyien/message:1.0
     restart: always
+    networks:
+      - playfoo
     environment:
       rabbit_host: rabbitmq
       rabbit_port: 5672
@@ -101,6 +119,8 @@ services:
       dockerfile: message_listener.Dockerfile
     image: aarontanyien/message_listener:1.0
     restart: always
+    networks:
+      - playfoo
     environment:
       rabbit_host: rabbitmq
       rabbit_port: 5672
@@ -118,6 +138,8 @@ services:
       dockerfile: Create_Room.Dockerfile
     image: aarontanyien/create_room:1.0
     restart: always
+    networks:
+      - playfoo
     depends_on:
       - room
       - game
@@ -144,6 +166,8 @@ services:
       dockerfile: Join_Room.Dockerfile
     image: aarontanyien/join_room:1.0
     restart: always
+    networks:
+      - playfoo
     depends_on:
       - room
       - game
@@ -170,6 +194,8 @@ services:
       dockerfile: Leave_Room.Dockerfile
     image: aarontanyien/leave_room:1.0
     restart: always
+    networks:
+      - playfoo
     depends_on:
       - room
       - activity_log
@@ -194,6 +220,8 @@ services:
       dockerfile: Send_Message.Dockerfile
     image: aarontanyien/send_message:1.0
     restart: always
+    networks:
+      - playfoo
     depends_on:
       - room
       - activity_log
@@ -208,3 +236,83 @@ services:
       PYTHONUNBUFFERED: 1
     ports:
       - "5103:5103"
+
+  #######################################
+  # Postgres: The database used by Kong
+  #######################################
+  kong-database:
+    image: postgres:9.6
+    restart: always
+    networks:
+      - playfoo
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  #######################################
+  # Kong database migration
+  #######################################
+  kong-migration:
+    image: kong:2.0.4
+    command: "kong migrations bootstrap"
+    restart: on-failure
+    networks:
+      - playfoo
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+    depends_on:
+      - kong-database
+
+  #######################################
+  # Kong: The API Gateway
+  #######################################
+  kong:
+    image: kong:2.0.4
+    restart: always
+    networks:
+      - playfoo
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    depends_on:
+      - kong-migration
+    ports:
+      - "8000:8000"
+  
+  #######################################
+  # Konga: Kong GUI
+  #######################################
+  konga:
+    image: pantsel/konga
+    restart: always
+    networks:
+      - playfoo
+    environment:
+      DB_ADAPTER: postgres
+      DB_HOST: kong-database
+      DB_USER: kong
+      DB_PASSWORD: password
+      DB_DATABASE: konga_db
+    depends_on:
+      - kong
+    ports:
+      - "1337:1337"
+    volumes:
+      - kongadata:/app/kongadata
