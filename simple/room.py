@@ -49,8 +49,10 @@ class Member(db.Model):
 
 
 #Get room based on game_id
-@app.route("/room/<string:game_id>")
-def get_room(game_id):
+@app.route("/game_id_room_detail", methods=['POST'])
+def get_room():
+    data = request.get_json()
+    game_id = data['game_id']
     roomlist = Room.query.filter_by(game_id=game_id)
     rooms = [room.json() for room in roomlist]
     room_name_list = [room['room_name'] for room in rooms]
@@ -72,8 +74,10 @@ def get_room(game_id):
     ), 404
 
 #Get room detail based on room_id
-@app.route("/room/detail/<string:room_id>")
-def get_room_detail(room_id):
+@app.route("/room_id_room_detail", methods=['POST'])
+def get_room_detail():
+    data = request.get_json()
+    room_id = data['room_id']
     selected_room = Room.query.filter_by(room_id=room_id).first()
     members = Member.query.filter_by(room_id=room_id)
     no_of_members = Member.query.filter_by(room_id=room_id).count()
@@ -142,8 +146,10 @@ def create_room():
 
 
 #Join Room
-@app.route("/room/<string:room_id>", methods=['POST'])
-def join_room(room_id):
+@app.route("/room/join", methods=['POST'])
+def join_room():
+    data = request.get_json()
+    room_id = data['room_id']
     selected_room = Room.query.filter_by(room_id=room_id).first()
     no_of_members = Member.query.filter_by(room_id=room_id).count()
     if no_of_members==selected_room.capacity:
@@ -159,8 +165,7 @@ def join_room(room_id):
         ), 401
     #Get user id via request
     else:
-        data = request.get_json()
-        member = Member(**data)
+        member = Member(user_id=data['user_id'],room_id=data['room_id'], room_name=data['room_name'])
     try:
         db.session.add(member)
         db.session.commit()

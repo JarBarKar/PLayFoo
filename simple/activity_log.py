@@ -30,7 +30,7 @@ class Activity_Log(Base):
         self.message = message
 
     def json(self):
-        return {"activity_id": self.activity_id, "description": self.description, "code": self.code, "timestamp": self.timestamp}
+        return {"activity_id": self.activity_id, "data": self.data, "code": self.code, "timestamp": self.timestamp}
 
 
 # @app.route("/activity_log", methods=['POST'])
@@ -55,7 +55,6 @@ def callback(channel, method, properties, body): # required signature for the ca
     print() # print a new line feed
 
 def processOrderLog(data):
-    print("DIEEE")
     data = json.loads(data.decode('UTF-8'))
     #check if send to activity or error depending on code
     log = Activity_Log(code=data['code'],data=json.dumps(data['data']),message=data['message'])

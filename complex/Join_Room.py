@@ -13,7 +13,7 @@ from os import environ
 app = Flask(__name__)
 CORS(app)
 
-room_URL = environ.get('room_URL')
+room_URL = environ.get('room_URL') or "http://localhost:5001/room"
 
 @app.route('/join', methods=['POST'])
 def join_room():
@@ -23,7 +23,6 @@ def join_room():
             # we expect room_id & user_id to be in request
             request_info = request.get_json()
             print("\nReceived a join request in JSON:", request_info)
-
             # do the actual work
             # 1. send room and user info
             result = processJoinRoom(request_info)
@@ -54,7 +53,7 @@ def processJoinRoom(request_info):
     # Invoke the room microservice
     print('\n-----Invoking room microservice-----')
     room_id = request_info['room_id']
-    room_result = invoke_http(room_URL + '/' + str(room_id), method='POST', json=request_info)
+    room_result = invoke_http(room_URL + '/' + 'join', method='POST', json=request_info)
     print('join_room_result:', room_result)
 
     #for activity_log routing key
@@ -64,7 +63,7 @@ def processJoinRoom(request_info):
         code = 201
         message = 'Room successfully joined'
         try:
-            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+            amqp_setup.channel.basic_publish(exchange="activity_error_exchange", body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
         except Exception as e:
             code=500
             message = "An error occurred while sending the message. " + str(e)
@@ -78,7 +77,7 @@ def processJoinRoom(request_info):
         code = 500
         message = 'Failed to join room'
         try:
-            amqp_setup.channel.basic_publish(exchange=exchange_name, body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
+            amqp_setup.channel.basic_publish(exchange='activity_error_exchange', body=json.dumps(room_result), properties=pika.BasicProperties(delivery_mode = 2), routing_key=routing_key)
             code = 500
         except Exception as e:
             code=500

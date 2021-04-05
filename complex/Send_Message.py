@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 # function to publish a sent message to the exchange of the room chat
-@app.route('/message/send', methods=['POST'])
+@app.route('/send_message', methods=['POST'])
 def publish_message():
     request_info = request.get_json()
     exchange_name = "roomchat"

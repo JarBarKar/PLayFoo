@@ -13,7 +13,7 @@ from os import environ
 app = Flask(__name__)
 CORS(app)
 
-room_URL = environ.get('room_URL')
+room_URL = environ.get('room_URL') or "http://localhost:5001/room"
 
 @app.route('/leave', methods=['DELETE'])
 def leave_room():
@@ -52,6 +52,7 @@ def leave_room():
 def processLeaveRoom(request_info):
     # Invoke the room microservice
     print('\n-----Invoking room microservice-----')
+    print(request_info,'juju')
     room_result = invoke_http(room_URL, method='DELETE', json=request_info)
     exchange_name = 'activity_error_exchange'
     print('leave_room_result:', room_result)

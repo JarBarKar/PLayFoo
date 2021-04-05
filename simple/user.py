@@ -28,11 +28,13 @@ class User(db.Model):
     def json(self):
         return {"user_id":self.user_id, "password":self.password}
 
-@app.route("/user/<string:user_id>")
-def find_by_user_id(user_id):
+@app.route("/user")
+def find_by_user_id():
     """
     to retrieve user information by user_id
     """
+    data = request.get_json()
+    user_id = data['user_id']
     user = User.query.filter_by(user_id=user_id).first()
     if user:
         return jsonify(
