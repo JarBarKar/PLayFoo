@@ -106,6 +106,8 @@ services:
       rabbit_port: 5672
       dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/message
       PYTHONUNBUFFERED: 1
+    ports:
+      - "5003:5003"
 
   ###############################################
   # Create Room: The Create Room complex microservice
