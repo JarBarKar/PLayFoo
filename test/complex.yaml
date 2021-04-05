@@ -1,0 +1,235 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: create-room
+    name: create-room
+  spec:
+    ports:
+    - name: "5100"
+      port: 5100
+      targetPort: 5100
+    clusterIP: 10.98.31.90
+    selector:
+      io.kompose.service: create-room
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      io.kompose.service: create-room
+    name: create-room
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: create-room
+    strategy: {}
+    template:
+      metadata:
+        name: create-room
+        labels:
+          io.kompose.service: create-room
+      spec:
+        containers:
+        - env:
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: game_URL
+            value: http://game:5002/game
+          - name: rabbit_host
+            value: rabbitmq
+          - name: rabbit_port
+            value: "5672"
+          - name: room_URL
+            value: http://10.105.231.40:5001/room
+          - name: user_URL
+            value: http://user:5000/user
+          image: aarontanyien/create_room:1.0
+          imagePullPolicy: ""
+          name: create-room
+          ports:
+          - containerPort: 5100
+          resources: {}
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: join-room
+    name: join-room
+  spec:
+    ports:
+    - name: "5101"
+      port: 5101
+      targetPort: 5101
+    clusterIP: 10.98.31.91
+    selector:
+      io.kompose.service: join-room
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      io.kompose.service: join-room
+    name: join-room
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: join-room
+    strategy: {}
+    template:
+      metadata:
+        name: join-room
+        labels:
+          io.kompose.network/playfoo: "true"
+          io.kompose.service: join-room
+      spec:
+        containers:
+        - env:
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: game_URL
+            value: http://game:5002/game
+          - name: rabbit_host
+            value: rabbitmq
+          - name: rabbit_port
+            value: "5672"
+          - name: room_URL
+            value: http://localhost:5001/room
+          - name: user_URL
+            value: http://user:5000/user
+          image: aarontanyien/join_room:1.0
+          imagePullPolicy: ""
+          name: join-room
+          ports:
+          - containerPort: 5101
+          resources: {}
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: leave-room
+    name: leave-room
+  spec:
+    ports:
+    - name: "5102"
+      port: 5102
+      targetPort: 5102
+    selector:
+      io.kompose.service: leave-room
+    clusterIP: 10.98.31.92
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      io.kompose.service: leave-room
+    name: leave-room
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: leave-room
+    strategy: {}
+    template:
+      metadata:
+        name: leave-room
+        labels:
+          io.kompose.network/playfoo: "true"
+          io.kompose.service: leave-room
+      spec:
+        containers:
+        - env:
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: rabbit_host
+            value: rabbitmq
+          - name: rabbit_port
+            value: "5672"
+          - name: room_URL
+            value: http://localhost:5001/room
+          - name: user_URL
+            value: http://user:5000/user
+          image: aarontanyien/leave_room:1.0
+          imagePullPolicy: ""
+          name: leave-room
+          ports:
+          - containerPort: 5102
+          resources: {}
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      io.kompose.service: send-message
+    name: send-message
+  spec:
+    ports:
+    - name: "5103"
+      port: 5103
+      targetPort: 5103
+    selector:
+      io.kompose.service: send-message
+    clusterIP: 10.98.31.93
+  status:
+    loadBalancer: {}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      io.kompose.service: send-message
+    name: send-message
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        io.kompose.service: send-message
+    strategy: {}
+    template:
+      metadata:
+        name: send-message
+        labels:
+          io.kompose.network/playfoo: "true"
+          io.kompose.service: send-message
+      spec:
+        containers:
+        - env:
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: rabbit_host
+            value: rabbitmq
+          - name: rabbit_port
+            value: "5672"
+          - name: room_URL
+            value: http://localhost:5001/room
+          - name: user_URL
+            value: http://user:5000/user
+          image: aarontanyien/send_message:1.0
+          imagePullPolicy: ""
+          name: send-message
+          ports:
+          - containerPort: 5103
+          resources: {}
+        restartPolicy: Always
+        serviceAccountName: ""
+        volumes: null
+  status: {}
+kind: List
+metadata: {}
