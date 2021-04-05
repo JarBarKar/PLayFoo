@@ -12,6 +12,21 @@ networks:
 services:
  
   ###################################
+  # User: The User simple microservice
+  ###################################
+  user:
+    build:
+      context: ./simple
+      dockerfile: user.Dockerfile
+    image: aarontanyien/user:1.0
+    restart: always
+    networks:
+      - playfoo
+    environment:
+      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/user
+      PYTHONUNBUFFERED: 1
+
+  ###################################
   # Room: The Room simple microservice
   ###################################
   room:
