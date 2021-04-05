@@ -18,3 +18,13 @@ Complex Microservices:
 AMQP:
     5672: RabbitMQ
     15672: RabbitMQ management
+
+Kong:
+    1337: Konga
+    5432: PostgresDB
+    8000: Kong
+    8001: Kong Admin
+
+MySQL:
+    3306: MySQL
+    8082: PHPMyAdmin
