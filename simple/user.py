@@ -28,7 +28,7 @@ class User(db.Model):
     def json(self):
         return {"user_id":self.user_id, "password":self.password}
 
-@app.route("/user")
+@app.route("/user", methods=['POST'])
 def find_by_user_id():
     """
     to retrieve user information by user_id
