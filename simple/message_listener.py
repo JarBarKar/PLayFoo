@@ -44,8 +44,10 @@ class Message(db.Model):
         return {"message_id":self.message_id, "room_id":self.room_id, "user_id":self.user_id, "content":self.content, "timestamp":self.timestamp}
 
 # keep pinging for new messages (room_id)
-@app.route('/message/listen/<string:room_id>')
-def listen_room(room_id):
+@app.route('/message/listen')
+def listen_room():
+    data = request.get_json()
+    room_id = data['room_id']
     messagelist = Message.query.filter_by(room_id=room_id)
     if messagelist:
         return jsonify(
