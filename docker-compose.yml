@@ -136,7 +136,7 @@ services:
   ##################################
   # Message_Listener: The Message Listener simple microservice
   ##################################
-  message_lister:
+  message_listener:
     build:
       context: ./simple
       dockerfile: message_listener.Dockerfile
