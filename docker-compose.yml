@@ -339,8 +339,6 @@ services:
       - "1337:1337"
     volumes:
       - kongadata:/app/kongadata
-<<<<<<< HEAD
-=======
 
   # #######################################
   # # MySQL & PHPMyAdmin: The primary database & interface
@@ -376,4 +374,3 @@ services:
   #     PMA_HOST: mysql-database
   #     # PMA_USER: root
   #     # PMA_PASSWORD: admin
->>>>>>> c521c96aaade2c0b4da72eea0dc6dbc3ae6ef051
